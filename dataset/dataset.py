@@ -8,10 +8,12 @@ import skimage.io
 import os
 import cv2
 import albumentations as A
+from omegaconf import DictConfig, OmegaConf
+import pandas as pd
+from hydra import utils
 
-from utils import crop_tile, tile
 
-def get_training_datasets(cfg: DictConfig) -> dict:
+def get_datasets(cfg: DictConfig) -> dict:
     """
     Get datases for modelling
 
@@ -22,7 +24,7 @@ def get_training_datasets(cfg: DictConfig) -> dict:
 
     """
 
-    df = pd.read_csv(os.path.join(cfg.dataset.data_dir,'train.csv'))
+    df = pd.read_csv(utils.to_absolute_path(os.path.join(cfg.dataset.data_dir,'train.csv')))
 
     kf = load_obj(cfg.dataset.split.class_name)(**cfg.dataset.split.params)
 
@@ -31,16 +33,18 @@ def get_training_datasets(cfg: DictConfig) -> dict:
     df['fold'] = df['fold'].astype(int)
 
     train_df = df[df['fold']!=cfg.dataset.fold]
-    val_df = df[df['fold']==cfg.dataset.fold]
+    valid_df = df[df['fold']==cfg.dataset.fold]
 
     # for debug run
     if cfg.training.debug:
         train_df = train_df[:10]
         valid_df = valid_df[:10]
 
-    train_augs_list = [load_obj(i['class_name'])(**i['params']) for i in cfg.dataset.augmentation.train]
+    train_augs_conf = OmegaConf.to_container(cfg.dataset.augmentation.train, resolve=True)
+    train_augs_list = [load_obj(i['class_name'])(**i['params']) for i in train_augs_conf]
     train_augs = A.Compose(train_augs_list)
 
+    valid_augs_conf = OmegaConf.to_container(cfg.dataset.augmentation.valid, resolve=True)
     valid_augs_list = [load_obj(i['class_name'])(**i['params']) for i in cfg.dataset.augmentation.valid]
     valid_augs = A.Compose(valid_augs_list)
 
@@ -50,7 +54,7 @@ def get_training_datasets(cfg: DictConfig) -> dict:
 
     valid_dataset = PANDADataset(valid_df,
                                   cfg.dataset.data_dir,
-                                  valid_augs)
+                                  transform=valid_augs)
 
     return {'train': train_dataset, 'valid': valid_dataset}
 
@@ -72,7 +76,7 @@ class PANDADataset(Dataset):
         return len(self.data)
     
     def __getitem__(self, idx):
-        img_name = os.path.join(os.path.join(self.data_dir, 'train_images/'), self.data.loc[idx, 'image_id'] + '.' +self.image_format)
+        img_name = utils.to_absolute_path(os.path.join(os.path.join(self.data_dir, 'train_images/'), self.data.loc[idx, 'image_id'] + '.' +'png'))
         data_provider = self.data.loc[idx, 'data_provider']
         gleason_score = self.data.loc[idx, 'gleason_score']
         isup_grade = label = self.data.loc[idx, 'isup_grade']

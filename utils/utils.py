@@ -1,6 +1,8 @@
 import importlib
 from typing import Any
 
+import numpy as np
+
 # https://github.com/quantumblacklabs/kedro/blob/9809bd7ca0556531fa4a2fc02d5b2dc26cf8fa97/kedro/utils.py
 def load_obj(obj_path: str, default_obj_path: str = "") -> Any:
     """Extract an object from a given path.
@@ -21,3 +23,8 @@ def load_obj(obj_path: str, default_obj_path: str = "") -> Any:
             f"Object `{obj_name}` cannot be loaded from `{obj_path}`."
         )
     return getattr(module_obj, obj_name)
+
+def preds_rounder(test_preds, num_class):
+    #print(np.floor(np.clip(test_preds + 0.5, 0, num_class)))
+    test_preds = np.floor(np.clip(test_preds + 0.5, 0, num_class))
+    return test_preds
