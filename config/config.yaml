@@ -54,9 +54,9 @@ dataset:
               params: {mean: [0.485, 0.456, 0.406], std: [0.229, 0.224, 0.225], max_pixel_value: 255.0, always_apply: false, p: 1.0}
 
 training:
-    batch_size: 32
     debug: false
     num_classes: 5
+    batch_size: 32
     learning_rate: 1e-4
     loss: 
       class_name: losses.loss.RMSELoss
@@ -74,8 +74,7 @@ training:
 trainer:
   accumulate_grad_batches: 1
   amp_level: O1
-  auto_scale_batch_size: null # binsearch
-  callbacks: []
+  auto_scale_batch_size: null # null | binsearch | power
   auto_lr_find: false # 'training.learning_rate' # true
   deterministic: false
   benchmark: true
@@ -94,7 +93,7 @@ trainer:
   max_steps: null
   min_steps: null
   num_nodes: 1
-  precision: 16
+  precision: 32
 
 logging:
   log_dir: logs
@@ -106,7 +105,7 @@ logging:
     api_key: ${private.neptune_api}
     project_name: hirune924/kaggle-PANDA
     close_after_fit: false
-    upload_source_files: ['*.py','*.ipynb']
+    upload_source_files: ['*.py','*.ipynb','.hydra/*.yaml']
     experiment_name: default
     
 callbacks:

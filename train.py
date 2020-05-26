@@ -7,6 +7,7 @@ from model.model import get_model
 from systems.system import PLRegressionImageClassificationSystem
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.callbacks import EarlyStopping
+from pytorch_lightning.callbacks import LearningRateLogger
 from pytorch_lightning.logging.neptune import NeptuneLogger
 from pytorch_lightning import loggers
 
@@ -16,6 +17,8 @@ def main(cfg: DictConfig) -> None:
     print(cfg.pretty())
     neptune_logger = NeptuneLogger(params=flatten_dict(OmegaConf.to_container(cfg, resolve=True)), **cfg.logging.neptune_logger)
     tb_logger = loggers.TensorBoardLogger(**cfg.logging.tb_logger)
+
+    lr_logger = LearningRateLogger()
  
     model = get_model(cfg)
 
@@ -33,6 +36,7 @@ def main(cfg: DictConfig) -> None:
         checkpoint_callback=checkpoint_callback,
         early_stop_callback=early_stop_callback,
         logger=[tb_logger, neptune_logger],
+        callbacks=[lr_logger],
         **cfg.trainer)
 
     trainer.fit(lit_model)
