@@ -22,12 +22,15 @@ from dataset.dataset import get_datasets
 
 from omegaconf import DictConfig, OmegaConf
 
+from argparse import Namespace
+
+
 class PLRegressionImageClassificationSystem(pl.LightningModule):
     
     def __init__(self, hparams: DictConfig = None, model = None):
     #def __init__(self, train_loader, val_loader, model):
         super(PLRegressionImageClassificationSystem, self).__init__()
-        self.hparams = hparams
+        self.hparams = OmegaConf.to_container(hparams, resolve=True)
         self.model = model
         self.criteria = get_loss(hparams)
 
@@ -81,7 +84,7 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
         y_hat = torch.cat([x['y_hat'] for x in outputs]).cpu().detach().numpy().copy()
 
         #preds = np.argmax(y_hat, axis=1)
-        preds = preds_rounder(y_hat, self.hparams.training.num_classes)
+        preds = preds_rounder(y_hat, self.hparams['training']['num_classes'])
         val_acc = metrics.accuracy_score(y, preds)
         val_qwk = metrics.cohen_kappa_score(y, preds, weights='quadratic')
 
@@ -97,11 +100,11 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
 
     def train_dataloader(self):
         # REQUIRED
-        return DataLoader(self.train_dataset, **self.hparams.training.dataloader.train)
+        return DataLoader(self.train_dataset, **self.hparams['training']['dataloader']['train'])
 
     def val_dataloader(self):
         # OPTIONAL
-        return DataLoader(self.valid_dataset, **self.hparams.training.dataloader.valid)
+        return DataLoader(self.valid_dataset, **self.hparams['training']['dataloader']['valid'])
 
     #def test_dataloader(self):
     #    # OPTIONAL

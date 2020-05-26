@@ -24,6 +24,7 @@ def get_datasets(cfg: DictConfig) -> dict:
 
     """
 
+    cfg = OmegaConf.create(cfg)
     df = pd.read_csv(utils.to_absolute_path(os.path.join(cfg.dataset.data_dir,'train.csv')))
 
     kf = load_obj(cfg.dataset.split.class_name)(**cfg.dataset.split.params)
