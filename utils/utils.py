@@ -2,6 +2,8 @@ import importlib
 from typing import Any
 
 import numpy as np
+import collections
+
 
 # https://github.com/quantumblacklabs/kedro/blob/9809bd7ca0556531fa4a2fc02d5b2dc26cf8fa97/kedro/utils.py
 def load_obj(obj_path: str, default_obj_path: str = "") -> Any:
@@ -28,3 +30,14 @@ def preds_rounder(test_preds, num_class):
     #print(np.floor(np.clip(test_preds + 0.5, 0, num_class)))
     test_preds = np.floor(np.clip(test_preds + 0.5, 0, num_class))
     return test_preds
+
+def flatten_dict(d, parent_key='', sep='.'):
+    items = []
+    for k, v in d.items():
+        new_key = parent_key + sep + k if parent_key else k
+        if isinstance(v, collections.MutableMapping):
+            items.extend(flatten_dict(v, new_key, sep=sep).items())
+        else:
+            items.append((new_key, v))
+    return dict(items)
+

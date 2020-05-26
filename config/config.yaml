@@ -1,5 +1,16 @@
+hydra:
+  run:
+    dir: outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}
+  sweep:
+    dir: multirun/${now:%Y-%m-%d}/${now:%H-%M-%S}
+    subdir: ${hydra.job.num}
+
+
 private:
-    neptune_api: ANONIMOUS
+    #neptune_api: ANONIMOUS
+    neptune_api: 'eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vdWkubmVwdHVuZS5haSIsImFwaV91cmwiOiJodHRwczovL3VpLm5lcHR1bmUuYWkiLCJhcGlfa2V5IjoiN2I2ZWM0NmQtNjg0NS00ZjM5LTkzNTItN2I4Nzc0YTUzMmM0In0='
+
+
 model:
     backbone:
         class_name: model.model.resnet18
@@ -87,7 +98,17 @@ trainer:
 
 logging:
   log_dir: logs
-
+  tb_logger:
+    save_dir: ${logging.log_dir}
+    name: default
+    version: null
+  neptune_logger:
+    api_key: ${private.neptune_api}
+    project_name: hirune924/kaggle-PANDA
+    close_after_fit: false
+    upload_source_files: ['*.py','*.ipynb']
+    experiment_name: default
+    
 callbacks:
   model_checkpoint:
     filepath: ${logging.log_dir}/fold${dataset.fold}-{epoch}-{avg_val_loss}-{val_qwk}
