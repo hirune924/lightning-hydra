@@ -100,6 +100,11 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
         val_acc = metrics.accuracy_score(y, preds)
         val_qwk = metrics.cohen_kappa_score(y, preds, weights='quadratic')
 
+        print(data_provider)
+        print(y)
+        print(preds)
+        print(data_provider=='karolinska')
+        print(preds[data_provider=='karolinska'])
         karolinska_qwk = metrics.cohen_kappa_score(y[data_provider=='karolinska'], preds[data_provider=='karolinska'], weights='quadratic', labels=range(6))
         radboud_qwk = metrics.cohen_kappa_score(y[data_provider=='radboud'], preds[data_provider=='radboud'], weights='quadratic', labels=range(6))
 
