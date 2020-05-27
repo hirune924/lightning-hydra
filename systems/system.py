@@ -24,7 +24,7 @@ from omegaconf import DictConfig, OmegaConf
 
 from argparse import Namespace
 
-from scikitplot.metrics import plot_confusion_matrix
+#from scikitplot.metrics import plot_confusion_matrix
 import matplotlib.pyplot as plt
 
 
@@ -137,7 +137,7 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
         test_qwk = metrics.cohen_kappa_score(y, preds, weights='quadratic')
 
         fig, ax = plt.subplots(figsize=(16, 12))
-        plot_confusion_matrix(y, preds, ax=ax)
+        #plot_confusion_matrix(y, preds, ax=ax)
         self.logger.experiment[1].log_image('confusion_matrix', fig)
 
 
