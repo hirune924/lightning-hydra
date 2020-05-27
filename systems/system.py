@@ -76,6 +76,8 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
         val_loss = self.criteria(y_hat, y.view(-1, 1).float())
         val_loss = val_loss.unsqueeze(dim=-1)
 
+        print(data_provider)
+
         return {'val_loss': val_loss, 'y': y, 'y_hat': y_hat, 'data_provider': data_provider, 'gleason_score':gleason_score}
 
     def validation_epoch_end(self, outputs):
