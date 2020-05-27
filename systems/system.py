@@ -87,13 +87,22 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
       
         data_provider = []
         for x in outputs:
-            print(x['data_provider'])
-            data_provider = data_provider + list(x['data_provider'])
+            for x_in in x['data_provider']:
+                if type(x_in) is str:
+                    data_provider = data_provider + [x_in]
+                else:
+                    data_provider = data_provider + list(x_in)
         data_provider = np.array(data_provider)
 
         gleason_score = []
         for x in outputs:
-            gleason_score = gleason_score + list(x['gleason_score'])
+            for x_in in x['gleason_score']:
+                if type(x_in) is str:
+                    gleason_score = gleason_score + [x_in]
+                else:
+                    gleason_score = gleason_score + list[x_in]
+            #gleason_score = gleason_score + list(x['gleason_score'])
+            #gleason_score = gleason_score + [ list(gs) for gs in list(x['gleason_score'])]
         gleason_score = np.array(gleason_score)
 
         #preds = np.argmax(y_hat, axis=1)
