@@ -29,7 +29,7 @@ def get_datasets(cfg: DictConfig) -> dict:
 
     kf = load_obj(cfg.dataset.split.class_name)(**cfg.dataset.split.params)
 
-    for fold, (train_index, val_index) in enumerate(kf.split(df.values, df['isup_grade'])):
+    for fold, (train_index, val_index) in enumerate(kf.split(df.values, df['isup_grade'].astype(str) + df['data_provider'])):
         df.loc[val_index, 'fold'] = int(fold)
     df['fold'] = df['fold'].astype(int)
 
@@ -88,4 +88,4 @@ class PANDADataset(Dataset):
         if self.transform:
             image = self.transform(image=image)
             image = torch.from_numpy(image['image'].transpose(2, 0, 1))
-        return image, isup_grade
+        return image, isup_grade, data_provider, gleason_score

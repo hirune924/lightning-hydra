@@ -24,6 +24,9 @@ from omegaconf import DictConfig, OmegaConf
 
 from argparse import Namespace
 
+from scikitplot.metrics import plot_confusion_matrix
+import matplotlib.pyplot as plt
+
 
 class PLRegressionImageClassificationSystem(pl.LightningModule):
     
@@ -40,7 +43,7 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
 # For Training
     def training_step(self, batch, batch_nb):
         # REQUIRED
-        x, y = batch
+        x, y, _, _ = batch
         y_hat = self.forward(x)
         loss = self.criteria(y_hat, y.view(-1, 1).float())
         loss = loss.unsqueeze(dim=-1)
@@ -49,7 +52,7 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
 
     def training_epoch_end(self, outputs):
         # OPTIONAL
-        avg_loss = torch.stack([x['loss'] for x in outputs]).mean()
+        avg_loss = torch.cat([x['loss'] for x in outputs]).mean()
         log = {'avg_train_loss': avg_loss}
         return {'avg_train_loss': avg_loss, 'log': log}
 
@@ -68,16 +71,61 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
 # For Validation
     def validation_step(self, batch, batch_nb):
         # OPTIONAL
-        x, y = batch
+        x, y, data_provider, gleason_score = batch
         y_hat = self.forward(x)
         val_loss = self.criteria(y_hat, y.view(-1, 1).float())
         val_loss = val_loss.unsqueeze(dim=-1)
 
-        return {'val_loss': val_loss, 'y': y, 'y_hat': y_hat}
+        return {'val_loss': val_loss, 'y': y, 'y_hat': y_hat, 'data_provider': data_provider, 'gleason_score':gleason_score}
 
     def validation_epoch_end(self, outputs):
         # OPTIONAL
-        avg_loss = torch.stack([x['val_loss'] for x in outputs]).mean()
+        avg_loss = torch.cat([x['val_loss'] for x in outputs]).mean()
+
+        y = torch.cat([x['y'] for x in outputs]).cpu().detach().numpy().copy()
+        y_hat = torch.cat([x['y_hat'] for x in outputs]).cpu().detach().numpy().copy()
+      
+        data_provider = []
+        for x in outputs:
+            data_provider = data_provider + list(x['data_provider'])
+        data_provider = np.array(data_provider)
+
+        gleason_score = []
+        for x in outputs:
+            gleason_score = gleason_score + list(x['gleason_score'])
+        gleason_score = np.array(gleason_score)
+
+        #preds = np.argmax(y_hat, axis=1)
+        preds = preds_rounder(y_hat, self.hparams['training']['num_classes'])
+        val_acc = metrics.accuracy_score(y, preds)
+        val_qwk = metrics.cohen_kappa_score(y, preds, weights='quadratic')
+
+        karolinska_qwk = metrics.cohen_kappa_score(y[data_provider=='karolinska'], preds[data_provider=='karolinska'], weights='quadratic')
+        radboud_qwk = metrics.cohen_kappa_score(y[data_provider=='radboud'], preds[data_provider=='radboud'], weights='quadratic')
+
+        sample_idx = (gleason_score != '0+0') & (gleason_score != '3+3') & (gleason_score != 'negative')
+        sample_qwk =  metrics.cohen_kappa_score(y[sample_idx], preds[sample_idx], weights='quadratic')
+
+        print(metrics.confusion_matrix(y, preds))
+
+        log = {'avg_val_loss': avg_loss, 'val_acc': val_acc, 'val_qwk': val_qwk,
+         'karolinska_qwk': karolinska_qwk, 'radboud_qwk': radboud_qwk, 'sample_qwk': sample_qwk}
+         
+        return {'avg_val_loss': avg_loss, 'log': log}
+
+    def test_step(self, batch, batch_nb):
+        # OPTIONAL
+        x, y, data_provider, gleason_score = batch
+        y_hat = self.forward(x)
+
+        test_loss = self.criteria(y_hat, y.view(-1, 1).float())
+        test_loss = test_loss.unsqueeze(dim=-1)
+
+        return {'test_loss': test_loss, 'y': y, 'y_hat': y_hat}
+
+    def test_epoch_end(self, outputs):
+        # OPTIONAL
+        avg_loss = torch.stack([x['test_loss'] for x in outputs]).mean()
 
         
         y = torch.cat([x['y'] for x in outputs]).cpu().detach().numpy().copy()
@@ -85,12 +133,17 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
 
         #preds = np.argmax(y_hat, axis=1)
         preds = preds_rounder(y_hat, self.hparams['training']['num_classes'])
-        val_acc = metrics.accuracy_score(y, preds)
-        val_qwk = metrics.cohen_kappa_score(y, preds, weights='quadratic')
+        test_acc = metrics.accuracy_score(y, preds)
+        test_qwk = metrics.cohen_kappa_score(y, preds, weights='quadratic')
+
+        fig, ax = plt.subplots(figsize=(16, 12))
+        plot_confusion_matrix(y, preds, ax=ax)
+        self.logger.experiment[1].log_image('confusion_matrix', fig)
 
 
-        log = {'avg_val_loss': avg_loss, 'val_acc': val_acc, 'val_qwk': val_qwk}
-        return {'avg_val_loss': avg_loss, 'log': log}
+
+        log = {'avg_test_loss': avg_loss, 'test_acc': test_acc, 'test_qwk': test_qwk}
+        return {'avg_test_loss': avg_loss, 'log': log}
 
 # For Data
     def prepare_data(self):
@@ -106,8 +159,8 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
         # OPTIONAL
         return DataLoader(self.valid_dataset, **self.hparams['training']['dataloader']['valid'])
 
-    #def test_dataloader(self):
-    #    # OPTIONAL
-    #    pass
+    def test_dataloader(self):
+        # OPTIONAL
+        return DataLoader(self.valid_dataset, **self.hparams['training']['dataloader']['valid'])
 
 

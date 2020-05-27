@@ -14,7 +14,8 @@ RUN apt-get update --fix-missing && apt-get install -y \
 RUN pip uninstall -y pillow && \
     pip install pandas scikit-image albumentations opencv-python openslide-python pillow-simd\
                 scikit-learn pytorch-lightning neptune-client imagecodecs tifffile \
-                pretrainedmodels catalyst[all] segmentation-models-pytorch timm hydra-core
+                pretrainedmodels catalyst[all] segmentation-models-pytorch timm hydra-core \
+                scikit-plot
 
 RUN git clone https://github.com/NVIDIA/apex && \
     cd apex && \

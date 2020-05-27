@@ -1,7 +1,9 @@
 from omegaconf import DictConfig, OmegaConf
 import hydra
+from hydra import utils
 
-from utils.utils import flatten_dict
+import glob
+from utils.utils import flatten_dict, load_pytorch_model
 from pytorch_lightning import Trainer, seed_everything
 from model.model import get_model
 from systems.system import PLRegressionImageClassificationSystem
@@ -21,6 +23,9 @@ def main(cfg: DictConfig) -> None:
     lr_logger = LearningRateLogger()
  
     model = get_model(cfg)
+    if cfg.model.ckpt_path is not None:
+        ckpt_pth = glob.glob(utils.to_absolute_path(cfg.model.chpt_path))
+        model = load_pytorch_model(ckpt_pth[0], model)
 
     seed_everything(2020)
 
@@ -40,6 +45,8 @@ def main(cfg: DictConfig) -> None:
         **cfg.trainer)
 
     trainer.fit(lit_model)
+
+    #trainer.test()
 
 if __name__ == '__main__':
     main()

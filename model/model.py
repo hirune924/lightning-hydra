@@ -7,9 +7,10 @@ import pretrainedmodels
 import segmentation_models_pytorch as smp
 
 
+
 def get_model(cfg):
-    model = load_obj(cfg.model.backbone.class_name)
-    model = model(**cfg.model.backbone.params)
+    model = load_obj(cfg.model.class_name)
+    model = model(**cfg.model.params)
 
     return model
 
