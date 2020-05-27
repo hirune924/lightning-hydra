@@ -9,6 +9,7 @@ import segmentation_models_pytorch as smp
 from layer.layer import AdaptiveConcatPool2d
 
 import glob
+from hydra import utils
 
 def get_model(cfg):
     model = load_obj(cfg.model.class_name)
