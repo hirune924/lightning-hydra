@@ -100,13 +100,13 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
         val_acc = metrics.accuracy_score(y, preds)
         val_qwk = metrics.cohen_kappa_score(y, preds, weights='quadratic')
 
-        karolinska_qwk = metrics.cohen_kappa_score(y[data_provider=='karolinska'], preds[data_provider=='karolinska'], weights='quadratic')
-        radboud_qwk = metrics.cohen_kappa_score(y[data_provider=='radboud'], preds[data_provider=='radboud'], weights='quadratic')
+        karolinska_qwk = metrics.cohen_kappa_score(y[data_provider=='karolinska'], preds[data_provider=='karolinska'], weights='quadratic', labels=range(6))
+        radboud_qwk = metrics.cohen_kappa_score(y[data_provider=='radboud'], preds[data_provider=='radboud'], weights='quadratic', labels=range(6))
 
         sample_idx = (gleason_score != '0+0') & (gleason_score != '3+3') & (gleason_score != 'negative')
-        sample_qwk =  metrics.cohen_kappa_score(y[sample_idx], preds[sample_idx], weights='quadratic')
+        sample_qwk =  metrics.cohen_kappa_score(y[sample_idx], preds[sample_idx], weights='quadratic', labels=range(6))
 
-        print(metrics.confusion_matrix(y, preds))
+        print(metrics.confusion_matrix(y, preds, labels=range(6)))
 
         log = {'avg_val_loss': avg_loss, 'val_acc': val_acc, 'val_qwk': val_qwk,
          'karolinska_qwk': karolinska_qwk, 'radboud_qwk': radboud_qwk, 'sample_qwk': sample_qwk}

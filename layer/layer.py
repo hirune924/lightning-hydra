@@ -5,6 +5,7 @@ from typing import Optional
 class AdaptiveConcatPool2d(nn.Module):
     "Layer that concats `AdaptiveAvgPool2d` and `AdaptiveMaxPool2d`."
     def __init__(self, sz:Optional[int]=None):
+        super(AdaptiveConcatPool2d, self).__init__()
         "Output will be 2*sz or 2 if sz is None"
         self.output_size = sz or 1
         self.ap = nn.AdaptiveAvgPool2d(self.output_size)
