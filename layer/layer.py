@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-class AdaptiveConcatPool2d(Module):
+class AdaptiveConcatPool2d(nn.Module):
     "Layer that concats `AdaptiveAvgPool2d` and `AdaptiveMaxPool2d`."
     def __init__(self, sz:Optional[int]=None):
         "Output will be 2*sz or 2 if sz is None"
