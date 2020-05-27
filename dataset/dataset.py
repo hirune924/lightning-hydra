@@ -96,7 +96,7 @@ def data_provider2id(data_provider):
 
 def gleason2id(gleason):
     trans_dict = {'negative': 0, '0+0': 1,
-     '3+3': 2, '3+4': 3, '4+3': 4, '4+4': 5,
-     '4+5': 6, '5+4': 7, '5+5': 8,
-     '3+5': 9, '5+3': 10}
-     return trans_dict[gleason]
+    '3+3': 2, '3+4': 3, '4+3': 4, '4+4': 5,
+    '4+5': 6, '5+4': 7, '5+5': 8,
+    '3+5': 9, '5+3': 10}
+    return trans_dict[gleason]
