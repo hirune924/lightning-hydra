@@ -14,7 +14,7 @@ from pytorch_lightning.logging.neptune import NeptuneLogger
 from pytorch_lightning import loggers
 
 
-@hydra.main(config_path='config/config.yaml', strict=True)
+@hydra.main(config_path='config/config.yaml', strict=False)
 def main(cfg: DictConfig) -> None:
     print(cfg.pretty())
     neptune_logger = NeptuneLogger(params=flatten_dict(OmegaConf.to_container(cfg, resolve=True)), **cfg.logging.neptune_logger)

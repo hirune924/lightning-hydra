@@ -79,7 +79,6 @@ trainer:
   deterministic: false
   benchmark: true
   distributed_backend: dp
-  max_epochs: 12
   check_val_every_n_epoch: 1
   profiler: false
   fast_dev_run: false
@@ -87,8 +86,8 @@ trainer:
   gradient_clip_val: 0.0
   log_gpu_memory: null
   log_save_interval: 100
-  max_epochs: 1000
-  min_epochs: 1
+  max_epochs: 100
+  min_epochs: 20
   max_steps: null
   min_steps: null
   num_nodes: 1
