@@ -87,6 +87,7 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
       
         data_provider = []
         for x in outputs:
+            print(x['data_provider'])
             data_provider = data_provider + list(x['data_provider'])
         data_provider = np.array(data_provider)
 
