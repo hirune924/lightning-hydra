@@ -91,6 +91,7 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
                 if type(x_in) is str:
                     data_provider = data_provider + [x_in]
                 else:
+                    print(x_in)
                     data_provider = data_provider + list(x_in)
         data_provider = np.array(data_provider)
 
