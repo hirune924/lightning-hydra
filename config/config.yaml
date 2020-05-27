@@ -107,6 +107,7 @@ logging:
     close_after_fit: false
     upload_source_files: ['*.py','*.ipynb','.hydra/*.yaml']
     experiment_name: default
+    send_hardware_metrics: true
     
 callbacks:
   model_checkpoint:
