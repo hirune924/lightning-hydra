@@ -24,7 +24,7 @@ def resnet18(pretrained=True, num_classes=1000):
     return model
 
 def se_resnet50(pretrained='imagenet', num_classes=1000, pool='avg', pool_size=1):
-    model = pretrainedmodels.__dict__[model_name](num_classes=1000, pretrained='imagenet')
+    model = pretrainedmodels.__dict__['se_resnet50'](num_classes=1000, pretrained='imagenet')
     in_features = model.last_linear.in_features
     if pool=='avg':
         model.last_linear = nn.Linear(in_features*(pool_size**2), num_classes)
