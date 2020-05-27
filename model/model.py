@@ -6,6 +6,8 @@ import torchvision.models as models
 import pretrainedmodels
 import segmentation_models_pytorch as smp
 
+from layer.layer import AdaptiveConcatPool2d
+
 
 
 def get_model(cfg):
@@ -18,5 +20,17 @@ def resnet18(pretrained=True, num_classes=1000):
     model = models.resnet18(pretrained=pretrained)
     in_features = model.fc.in_features
     model.fc = nn.Linear(in_features, num_classes)
+
+    return model
+
+def se_resnet50(pretrained='imagenet', num_classes=1000, pool='avg', pool_size=1):
+    model = pretrainedmodels.__dict__[model_name](num_classes=1000, pretrained='imagenet')
+    in_features = model.last_linear.in_features
+    if pool=='avg':
+        model.last_linear = nn.Linear(in_features*(pool_size**2), num_classes)
+        model.avg_pool = torch.nn.AdaptiveAvgPool2d(pool_size)
+    elif pool=='avgmax':
+        model.last_linear = nn.Linear(in_features*2*(pool_size**2), num_classes)
+        model.avg_pool = AdaptiveConcatPool2d(pool_size)  
 
     return model
