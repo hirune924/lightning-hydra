@@ -76,8 +76,6 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
         val_loss = self.criteria(y_hat, y.view(-1, 1).float())
         val_loss = val_loss.unsqueeze(dim=-1)
 
-        print(data_provider)
-
         return {'val_loss': val_loss, 'y': y, 'y_hat': y_hat, 'data_provider': data_provider, 'gleason_score':gleason_score}
 
     def validation_epoch_end(self, outputs):
@@ -86,7 +84,10 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
 
         y = torch.cat([x['y'] for x in outputs]).cpu().detach().numpy().copy()
         y_hat = torch.cat([x['y_hat'] for x in outputs]).cpu().detach().numpy().copy()
-      
+
+        data_provider = torch.cat([x['data_provider'] for x in outputs]).cpu().detach().numpy().copy()
+        gleason_score = torch.cat([x['gleason_score'] for x in outputs]).cpu().detach().numpy().copy()
+        '''
         data_provider = []
         for x in outputs:
             for x_in in x['data_provider']:
@@ -107,6 +108,7 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
             #gleason_score = gleason_score + list(x['gleason_score'])
             #gleason_score = gleason_score + [ list(gs) for gs in list(x['gleason_score'])]
         gleason_score = np.array(gleason_score)
+        '''
 
         #preds = np.argmax(y_hat, axis=1)
         preds = preds_rounder(y_hat, self.hparams['training']['num_classes'])
@@ -116,12 +118,12 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
         print(data_provider)
         print(y)
         print(preds)
-        print(data_provider=='karolinska')
-        print(preds[data_provider=='karolinska'])
-        karolinska_qwk = metrics.cohen_kappa_score(y[data_provider=='karolinska'], preds[data_provider=='karolinska'], weights='quadratic', labels=range(6))
-        radboud_qwk = metrics.cohen_kappa_score(y[data_provider=='radboud'], preds[data_provider=='radboud'], weights='quadratic', labels=range(6))
+        print(data_provider==0)
+        print(preds[data_provider==0])
+        karolinska_qwk = metrics.cohen_kappa_score(y[data_provider==0], preds[data_provider==0], weights='quadratic', labels=range(6))
+        radboud_qwk = metrics.cohen_kappa_score(y[data_provider==1], preds[data_provider==1], weights='quadratic', labels=range(6))
 
-        sample_idx = (gleason_score != '0+0') & (gleason_score != '3+3') & (gleason_score != 'negative')
+        sample_idx = (gleason_score != 0) & (gleason_score != 1) & (gleason_score != 2)
         sample_qwk =  metrics.cohen_kappa_score(y[sample_idx], preds[sample_idx], weights='quadratic', labels=range(6))
 
         print(metrics.confusion_matrix(y, preds, labels=range(6)))

@@ -80,7 +80,7 @@ class PANDADataset(Dataset):
         img_name = utils.to_absolute_path(os.path.join(os.path.join(self.data_dir, 'train_images/'), self.data.loc[idx, 'image_id'] + '.' +'png'))
         data_provider = self.data.loc[idx, 'data_provider']
         gleason_score = self.data.loc[idx, 'gleason_score']
-        isup_grade = label = self.data.loc[idx, 'isup_grade']
+        isup_grade = self.data.loc[idx, 'isup_grade']
         
         image = cv2.imread(img_name)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -88,4 +88,15 @@ class PANDADataset(Dataset):
         if self.transform:
             image = self.transform(image=image)
             image = torch.from_numpy(image['image'].transpose(2, 0, 1))
-        return image, isup_grade, data_provider, gleason_score
+        return image, isup_grade, data_provider2id(data_provider), gleason2id(gleason_score)
+
+def data_provider2id(data_provider):
+    trans_dict = {'karolinska': 0, 'radboud': 1}
+    return trans_dict[data_provider]
+
+def gleason2id(gleason):
+    trans_dict = {'negative': 0, '0+0': 1,
+     '3+3': 2, '3+4': 3, '4+3': 4, '4+4': 5,
+     '4+5': 6, '5+4': 7, '5+5': 8,
+     '3+5': 9, '5+3': 10}
+     return trans_dict[gleason]
