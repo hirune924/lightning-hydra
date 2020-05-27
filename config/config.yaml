@@ -17,6 +17,7 @@ model:
         pretrained: true
         num_classes: 1
     ckpt_path: null
+    
 dataset: 
     data_dir: ../data
     image_size: 224
