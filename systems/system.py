@@ -52,7 +52,7 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
 
     def training_epoch_end(self, outputs):
         # OPTIONAL
-        avg_loss = torch.cat([x['loss'] for x in outputs]).mean()
+        avg_loss = torch.stack([x['loss'] for x in outputs]).mean()
         log = {'avg_train_loss': avg_loss}
         return {'avg_train_loss': avg_loss, 'log': log}
 
@@ -80,7 +80,7 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
 
     def validation_epoch_end(self, outputs):
         # OPTIONAL
-        avg_loss = torch.cat([x['val_loss'] for x in outputs]).mean()
+        avg_loss = torch.stack([x['val_loss'] for x in outputs]).mean()
 
         y = torch.cat([x['y'] for x in outputs]).cpu().detach().numpy().copy()
         y_hat = torch.cat([x['y_hat'] for x in outputs]).cpu().detach().numpy().copy()

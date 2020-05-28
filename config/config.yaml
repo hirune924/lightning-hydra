@@ -57,7 +57,7 @@ dataset:
 training:
     debug: false
     num_classes: 5
-    batch_size: 4
+    batch_size: 32
     learning_rate: 1e-4
     loss: 
       class_name: losses.loss.RMSELoss
@@ -103,10 +103,13 @@ logging:
   neptune_logger:
     api_key: ${private.neptune_api}
     project_name: hirune924/kaggle-PANDA
-    close_after_fit: false
+    close_after_fit: true
     upload_source_files: ['*.py','*.ipynb','.hydra/*.yaml']
     experiment_name: default
-    send_hardware_metrics: true
+    #send_hardware_metrics: false
+    #upload_stdout: false
+    #upload_stderr: false
+    #run_monitoring_thread: false
     
 callbacks:
   model_checkpoint:
