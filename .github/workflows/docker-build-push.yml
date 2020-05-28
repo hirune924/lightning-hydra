@@ -1,0 +1,38 @@
+name: Docker-build-push
+
+on:
+  push:
+    # Publish `master` as Docker `latest` image.
+    branches:
+      - master
+    # TODO: Change variable to your Docker file path for event trigger.:
+    paths: 
+      - docker/Dockerfile
+
+env:
+  # TODO: Change variable to your image's name, dockerhub account tag docker file path.: 
+  IMAGE_NAME: kaggle_panda
+  DOCKERHUB_ACCOUNT: hirune924
+  TAG_NAME: latest
+  DOCKER_FILE_PATH: docker/Dockerfile
+
+jobs:
+  push:
+
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build image
+        run: docker build . --file $DOCKER_FILE_PATH --tag $DOCKERHUB_ACCOUNT/$IMAGE_NAME
+
+      - name: Log into registry
+        env:
+          DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
+        run: |
+          echo "${DOCKER_HUB_TOKEN}" | docker login -u $DOCKERHUB_ACCOUNT --password-stdin
+      - name: Push image
+        run: |
+          docker push $DOCKERHUB_ACCOUNT/$IMAGE_NAME:$TAG_NAME
