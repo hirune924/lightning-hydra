@@ -87,42 +87,14 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
 
         data_provider = torch.cat([x['data_provider'] for x in outputs]).cpu().detach().numpy().copy()
         gleason_score = torch.cat([x['gleason_score'] for x in outputs]).cpu().detach().numpy().copy()
-        '''
-        data_provider = []
-        for x in outputs:
-            for x_in in x['data_provider']:
-                if type(x_in) is str:
-                    data_provider = data_provider + [x_in]
-                else:
-                    print(x_in)
-                    data_provider = data_provider + list(x_in)
-        data_provider = np.array(data_provider)
-
-        gleason_score = []
-        for x in outputs:
-            for x_in in x['gleason_score']:
-                if type(x_in) is str:
-                    gleason_score = gleason_score + [x_in]
-                else:
-                    gleason_score = gleason_score + list[x_in]
-            #gleason_score = gleason_score + list(x['gleason_score'])
-            #gleason_score = gleason_score + [ list(gs) for gs in list(x['gleason_score'])]
-        gleason_score = np.array(gleason_score)
-        '''
 
         #preds = np.argmax(y_hat, axis=1)
         preds = preds_rounder(y_hat, self.hparams['training']['num_classes'])
+
         val_acc = metrics.accuracy_score(y, preds)
         val_qwk = metrics.cohen_kappa_score(y, preds, weights='quadratic')
-
-        print(data_provider)
-        print(y)
-        print(preds)
-        print(data_provider==0)
-        print(preds[data_provider==0])
         karolinska_qwk = metrics.cohen_kappa_score(y[data_provider==0], preds[data_provider==0], weights='quadratic', labels=range(6))
         radboud_qwk = metrics.cohen_kappa_score(y[data_provider==1], preds[data_provider==1], weights='quadratic', labels=range(6))
-
         sample_idx = (gleason_score != 0) & (gleason_score != 1) & (gleason_score != 2)
         sample_qwk =  metrics.cohen_kappa_score(y[sample_idx], preds[sample_idx], weights='quadratic', labels=range(6))
 

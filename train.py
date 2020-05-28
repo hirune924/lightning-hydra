@@ -40,8 +40,8 @@ def main(cfg: DictConfig) -> None:
     trainer = Trainer(
         checkpoint_callback=checkpoint_callback,
         early_stop_callback=early_stop_callback,
-        #logger=[tb_logger, neptune_logger],
-        logger=[tb_logger],
+        logger=[tb_logger, neptune_logger],
+        #logger=[tb_logger],
         callbacks=[lr_logger],
         **cfg.trainer)
 
