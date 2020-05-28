@@ -18,7 +18,7 @@ RUN git clone https://github.com/NVIDIA/apex && \
 
 #RUN pip uninstall -y pillow && \
 RUN pip install --upgrade pip && \
-    pip install pandas scikit-image albumentations opencv-python openslide-python \
+    pip install pandas scikit-image opencv-python openslide-python \
                 scikit-learn pytorch-lightning imagecodecs tifffile \
                 pretrainedmodels catalyst[all] segmentation-models-pytorch timm hydra-core \
                 scikit-plot && \
