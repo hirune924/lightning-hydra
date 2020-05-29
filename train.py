@@ -10,14 +10,15 @@ from systems.system import PLRegressionImageClassificationSystem
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.callbacks import EarlyStopping
 from pytorch_lightning.callbacks import LearningRateLogger
-from pytorch_lightning.logging.neptune import NeptuneLogger
+#from pytorch_lightning.logging.neptune import NeptuneLogger
+from logger.logger import CustomNeptuneLogger
 from pytorch_lightning import loggers
 
 
 @hydra.main(config_path='config/config.yaml', strict=False)
 def main(cfg: DictConfig) -> None:
     print(cfg.pretty())
-    neptune_logger = NeptuneLogger(params=flatten_dict(OmegaConf.to_container(cfg, resolve=True)), **cfg.logging.neptune_logger)
+    neptune_logger = CustomNeptuneLogger(params=flatten_dict(OmegaConf.to_container(cfg, resolve=True)), **cfg.logging.neptune_logger)
     tb_logger = loggers.TensorBoardLogger(**cfg.logging.tb_logger)
 
     lr_logger = LearningRateLogger()
