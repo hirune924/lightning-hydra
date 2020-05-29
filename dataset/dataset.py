@@ -55,12 +55,14 @@ def get_datasets(cfg: DictConfig) -> dict:
     train_dataset = PANDADataset(train_df,
                                   cfg.dataset.data_dir,
                                   transform=train_augs,
-                                  load_type=cfg.dataset.load_type)
+                                  load_type=cfg.dataset.load_type,
+                                  train=True)
 
     valid_dataset = PANDADataset(valid_df,
                                   cfg.dataset.data_dir,
                                   transform=valid_augs,
-                                  load_type=cfg.dataset.load_type)
+                                  load_type=cfg.dataset.load_type,
+                                  train=False)
 
     return {'train': train_dataset, 'valid': valid_dataset}
 
@@ -68,7 +70,7 @@ def get_datasets(cfg: DictConfig) -> dict:
 class PANDADataset(Dataset):
     """PANDA Dataset."""
     
-    def __init__(self, dataframe, data_dir, transform=None, load_type='png'):
+    def __init__(self, dataframe, data_dir, transform=None, load_type='png', train=True):
         """
         Args:
             data_path (string): data path(glob_pattern) for dataset images
@@ -78,6 +80,7 @@ class PANDADataset(Dataset):
         self.transform = transform
         self.data_dir = data_dir
         self.load_type = load_type
+        self.train = train
         
     def __len__(self):
         return len(self.data)
@@ -90,7 +93,7 @@ class PANDADataset(Dataset):
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         elif self.load_type == 'tiff_tile':
             img_name = utils.to_absolute_path(os.path.join(os.path.join(self.data_dir, 'train_images/'), self.data.loc[idx, 'image_id'] + '.' +'tiff'))
-            scale_rand = np.clip(np.random.normal(loc=2, scale=1, size=1), 0.5,3.5)
+            scale_rand = np.clip(np.random.normal(loc=2, scale=1, size=1), 0.5,3.5) if self.train else 2.0
             image = load_img(img_name, K=16, scaling_factor=scale_rand, layer=1)
         data_provider = self.data.loc[idx, 'data_provider']
         gleason_score = self.data.loc[idx, 'gleason_score']
