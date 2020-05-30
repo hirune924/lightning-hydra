@@ -19,6 +19,7 @@ from losses.loss import get_loss
 from optimizer.optimizer import get_optimizer
 from scheduler.scheduler import get_scheduler
 from dataset.dataset import get_datasets
+from metrics.metric import lazy_accuracy
 
 from omegaconf import DictConfig, OmegaConf
 
@@ -141,7 +142,8 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
             labels=range(self.num_classes),
         )
 
-        print(metrics.confusion_matrix(y, preds, labels=range(self.num_classes)))
+        #print(metrics.confusion_matrix(y, preds, labels=range(self.num_classes)))
+        lazy_acc = lazy_accuracy(y, preds, num_classes=self.num_classes, verbose=True)
 
         log = {
             "avg_val_loss": avg_loss,
@@ -150,6 +152,7 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
             "karolinska_qwk": karolinska_qwk,
             "radboud_qwk": radboud_qwk,
             "sample_qwk": sample_qwk,
+            "lazy_acc": lazy_acc
         }
 
         return {"avg_val_loss": avg_loss, "log": log}
