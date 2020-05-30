@@ -21,17 +21,17 @@ def load_obj(obj_path: str, default_obj_path: str = "") -> Any:
     obj_name = obj_path_list[0]
     module_obj = importlib.import_module(obj_path)
     if not hasattr(module_obj, obj_name):
-        raise AttributeError(
-            f"Object `{obj_name}` cannot be loaded from `{obj_path}`."
-        )
+        raise AttributeError(f"Object `{obj_name}` cannot be loaded from `{obj_path}`.")
     return getattr(module_obj, obj_name)
 
+
 def preds_rounder(test_preds, num_class):
-    #print(np.floor(np.clip(test_preds + 0.5, 0, num_class)))
-    test_preds = np.floor(np.clip(test_preds + 0.5, 0, num_class-1))
+    # print(np.floor(np.clip(test_preds + 0.5, 0, num_class)))
+    test_preds = np.floor(np.clip(test_preds + 0.5, 0, num_class - 1))
     return test_preds
 
-def flatten_dict(d, parent_key='', sep='/'):
+
+def flatten_dict(d, parent_key="", sep="/"):
     items = []
     for k, v in d.items():
         new_key = parent_key + sep + k if parent_key else k
@@ -41,13 +41,14 @@ def flatten_dict(d, parent_key='', sep='/'):
             items.append((new_key, v))
     return dict(items)
 
+
 def load_pytorch_model(ckpt_name, model):
-    state_dict = torch.load(ckpt_name)['state_dict']
+    state_dict = torch.load(ckpt_name)["state_dict"]
     new_state_dict = OrderedDict()
     for k, v in state_dict.items():
         name = k
-        if name.startswith('model.'):
-            name = name.replace('model.', '') # remove `model.`
+        if name.startswith("model."):
+            name = name.replace("model.", "")  # remove `model.`
         new_state_dict[name] = v
     model.load_state_dict(new_state_dict)
     return model

@@ -1,6 +1,6 @@
 import os
 
-import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
+import pandas as pd  # data processing, CSV file I/O (e.g. pd.read_csv)
 
 import cv2
 from tqdm import tqdm
@@ -24,23 +24,24 @@ def compute_statistics(image):
     """
     width, height = image.shape[0], image.shape[1]
     num_pixels = width * height
-    
+
     num_white_pixels = 0
-    
+
     summed_matrix = np.sum(image, axis=-1)
     # Note: A 3-channel white pixel has RGB (255, 255, 255)
     num_white_pixels = np.count_nonzero(summed_matrix > 700)
-    #num_white_pixels = np.count_nonzero(summed_matrix > 255*3-1)
+    # num_white_pixels = np.count_nonzero(summed_matrix > 255*3-1)
     ratio_white_pixels = num_white_pixels / num_pixels
-    
-    #red_concentration = np.mean(image[:,:,0])
-    #red_concentration = np.mean(image[:,:,0][summed_matrix!=255*3])    
-    green_concentration = np.mean(image[:,:,1])
-    #green_concentration = np.mean(image[:,:,1][summed_matrix<200*3])
-    blue_concentration = np.mean(image[:,:,2])
-    #blue_concentration = np.mean(image[:,:,2][summed_matrix<200*3])
-    
+
+    # red_concentration = np.mean(image[:,:,0])
+    # red_concentration = np.mean(image[:,:,0][summed_matrix!=255*3])
+    green_concentration = np.mean(image[:, :, 1])
+    # green_concentration = np.mean(image[:,:,1][summed_matrix<200*3])
+    blue_concentration = np.mean(image[:, :, 2])
+    # blue_concentration = np.mean(image[:,:,2][summed_matrix<200*3])
+
     return ratio_white_pixels, green_concentration, blue_concentration
+
 
 def select_k_best_regions(regions, k=20):
     """
@@ -50,137 +51,190 @@ def select_k_best_regions(regions, k=20):
                                              
         k                     int            number of regions to select
     """
-    #regions = [x for x in regions if x[3] > 100 and x[4] > 100]
+    # regions = [x for x in regions if x[3] > 100 and x[4] > 100]
     k_best_regions = sorted(regions, key=lambda tup: tup[2])[:k]
     return k_best_regions
+
 
 def get_k_best_regions(coordinates, image, window_size=512):
     regions = {}
     for i, tup in enumerate(coordinates):
         x, y = tup[0], tup[1]
-        regions[i] = image[x : x+window_size, y : y+window_size, :]
-    
+        regions[i] = image[x : x + window_size, y : y + window_size, :]
+
     return regions
 
-def detect_best_window_size(image,K=16, scaling_factor=1.0):
-    #image = skimage.io.MultiImage(slide_path)[2]
-    #image = np.array(image)
-    ratio_white_pixels, green_concentration, blue_concentration = compute_statistics(image)
-    #print(ratio_white_pixels, green_concentration, blue_concentration)
-    h,w = image.shape[:2]
-    return max(int(np.sqrt(h*w*(1.0-ratio_white_pixels)*scaling_factor/K)),30)
 
-def generate_patches(slide_path, window_size=128, stride=128, k=20, auto_ws=False, scaling_factor=1.0):
-    
+def detect_best_window_size(image, K=16, scaling_factor=1.0):
+    # image = skimage.io.MultiImage(slide_path)[2]
+    # image = np.array(image)
+    ratio_white_pixels, green_concentration, blue_concentration = compute_statistics(
+        image
+    )
+    # print(ratio_white_pixels, green_concentration, blue_concentration)
+    h, w = image.shape[:2]
+    return max(
+        int(np.sqrt(h * w * (1.0 - ratio_white_pixels) * scaling_factor / K)), 30
+    )
+
+
+def generate_patches(
+    slide_path, window_size=128, stride=128, k=20, auto_ws=False, scaling_factor=1.0
+):
+
     image = skimage.io.MultiImage(slide_path)[2]
     image = np.array(image)
-    
+
     if auto_ws:
-        window_size = detect_best_window_size(image,K=16, scaling_factor=scaling_factor)
+        window_size = detect_best_window_size(
+            image, K=16, scaling_factor=scaling_factor
+        )
         stride = window_size
-    
+
     max_width, max_height = image.shape[0], image.shape[1]
     regions_container = []
     i = 0
-    
-    while window_size + stride*i <= max_height:
+
+    while window_size + stride * i <= max_height:
         j = 0
-        
-        while window_size + stride*j <= max_width:            
+
+        while window_size + stride * j <= max_width:
             x_top_left_pixel = j * stride
             y_top_left_pixel = i * stride
-            
+
             patch = image[
                 x_top_left_pixel : x_top_left_pixel + window_size,
                 y_top_left_pixel : y_top_left_pixel + window_size,
-                :
+                :,
             ]
-            
-            ratio_white_pixels, green_concentration, blue_concentration = compute_statistics(patch)
-            
-            region_tuple = (x_top_left_pixel, y_top_left_pixel, ratio_white_pixels, green_concentration, blue_concentration)
+
+            (
+                ratio_white_pixels,
+                green_concentration,
+                blue_concentration,
+            ) = compute_statistics(patch)
+
+            region_tuple = (
+                x_top_left_pixel,
+                y_top_left_pixel,
+                ratio_white_pixels,
+                green_concentration,
+                blue_concentration,
+            )
             regions_container.append(region_tuple)
-            
+
             j += 1
-        
+
         i += 1
-    
+
     k_best_region_coordinates = select_k_best_regions(regions_container, k=k)
     k_best_regions = get_k_best_regions(k_best_region_coordinates, image, window_size)
-    
+
     return image, k_best_region_coordinates, k_best_regions, window_size
+
 
 def glue_to_one_picture_from_coord(url, coordinates, window_size=200, k=16, layer=0):
     side = int(np.sqrt(k))
     slide = openslide.OpenSlide(url)
     lv2_scale = slide.level_downsamples[2]
     scale = slide.level_downsamples[2] / slide.level_downsamples[layer]
-    #print(scale)
-    
-    #image = np.zeros((int(side*window_size*scale), int(side*window_size*scale), 3), dtype=np.uint8)
-    image = np.full((int(side*window_size*scale), int(side*window_size*scale), 3), 255, dtype=np.uint8)
-    #print(coordinates)
+    # print(scale)
+
+    # image = np.zeros((int(side*window_size*scale), int(side*window_size*scale), 3), dtype=np.uint8)
+    image = np.full(
+        (int(side * window_size * scale), int(side * window_size * scale), 3),
+        255,
+        dtype=np.uint8,
+    )
+    # print(coordinates)
     for i, patch_coord in enumerate(coordinates):
         x = i // side
         y = i % side
-        patch = np.asarray(slide.read_region((int(patch_coord[1]*lv2_scale), int(patch_coord[0]*lv2_scale)), layer, (int(window_size*scale),int(window_size*scale))))[:,:,:3]
+        patch = np.asarray(
+            slide.read_region(
+                (int(patch_coord[1] * lv2_scale), int(patch_coord[0] * lv2_scale)),
+                layer,
+                (int(window_size * scale), int(window_size * scale)),
+            )
+        )[:, :, :3]
         image[
-            int(x * window_size*scale) : int(x * window_size*scale) + int(window_size*scale),
-            int(y * window_size*scale) : int(y * window_size*scale) + int(window_size*scale),
-            :
+            int(x * window_size * scale) : int(x * window_size * scale)
+            + int(window_size * scale),
+            int(y * window_size * scale) : int(y * window_size * scale)
+            + int(window_size * scale),
+            :,
         ] = patch
     slide.close()
     return image
 
+
 def glue_to_one_picture(image_patches, window_size=200, k=16):
     side = int(np.sqrt(k))
-    image = np.zeros((side*window_size, side*window_size, 3), dtype=np.uint8)
-        
+    image = np.zeros((side * window_size, side * window_size, 3), dtype=np.uint8)
+
     for i, patch in image_patches.items():
         x = i // side
         y = i % side
         image[
-            x * window_size : (x+1) * window_size,
-            y * window_size : (y+1) * window_size,
-            :
+            x * window_size : (x + 1) * window_size,
+            y * window_size : (y + 1) * window_size,
+            :,
         ] = patch
-    
+
     return image
 
 
 def load_img(img_name, K=16, scaling_factor=1.0, layer=0):
     WINDOW_SIZE = 128
     STRIDE = 128
-    #K = 16
-    image, best_coordinates, best_regions, win = generate_patches(img_name, window_size=WINDOW_SIZE, stride=STRIDE, k=K, auto_ws=True, scaling_factor=scaling_factor)
+    # K = 16
+    image, best_coordinates, best_regions, win = generate_patches(
+        img_name,
+        window_size=WINDOW_SIZE,
+        stride=STRIDE,
+        k=K,
+        auto_ws=True,
+        scaling_factor=scaling_factor,
+    )
     WINDOW_SIZE = win
     STRIDE = WINDOW_SIZE
-    #print(win)
-    #glued_image = glue_to_one_picture(best_regions, window_size=WINDOW_SIZE, k=K)
-    glued_image = glue_to_one_picture_from_coord(img_name, best_coordinates, window_size=WINDOW_SIZE, k=K, layer=layer)
+    # print(win)
+    # glued_image = glue_to_one_picture(best_regions, window_size=WINDOW_SIZE, k=K)
+    glued_image = glue_to_one_picture_from_coord(
+        img_name, best_coordinates, window_size=WINDOW_SIZE, k=K, layer=layer
+    )
     return glued_image
 
-def main(args):
-    
-    train_labels = pd.read_csv(os.path.join(args.data_dir, 'train.csv'))
 
-    os.makedirs(os.path.join(args.save_dir, 'train_images'), exist_ok=True)
-    shutil.copyfile(os.path.join(args.data_dir, 'sample_submission.csv'),os.path.join(args.save_dir, 'sample_submission.csv'))
-    shutil.copyfile(os.path.join(args.data_dir, 'train.csv'),os.path.join(args.save_dir, 'train.csv'))
-    shutil.copyfile(os.path.join(args.data_dir, 'test.csv'),os.path.join(args.save_dir, 'test.csv'))
-    
+def main(args):
+
+    train_labels = pd.read_csv(os.path.join(args.data_dir, "train.csv"))
+
+    os.makedirs(os.path.join(args.save_dir, "train_images"), exist_ok=True)
+    shutil.copyfile(
+        os.path.join(args.data_dir, "sample_submission.csv"),
+        os.path.join(args.save_dir, "sample_submission.csv"),
+    )
+    shutil.copyfile(
+        os.path.join(args.data_dir, "train.csv"),
+        os.path.join(args.save_dir, "train.csv"),
+    )
+    shutil.copyfile(
+        os.path.join(args.data_dir, "test.csv"), os.path.join(args.save_dir, "test.csv")
+    )
+
     for img_id in tqdm(train_labels.image_id):
         print(img_id)
-        load_path = os.path.join(args.data_dir, 'train_images/' + img_id + '.tiff')
-        save_path = os.path.join(args.save_dir, 'train_images/' + img_id + '.png')
+        load_path = os.path.join(args.data_dir, "train_images/" + img_id + ".tiff")
+        save_path = os.path.join(args.save_dir, "train_images/" + img_id + ".png")
 
-        #biopsy = skimage.io.MultiImage(load_path)
+        # biopsy = skimage.io.MultiImage(load_path)
         biopsy_tile = load_img(load_path, K=16)
         img = cv2.resize(biopsy_tile, (args.size, args.size))
         img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
         cv2.imwrite(save_path, img)
 
-    '''
+    """
     os.makedirs(os.path.join(args.save_dir, 'train_label_masks'), exist_ok=True)
     mask_files = os.listdir(os.path.join(args.data_dir, 'train_label_masks'))
     
@@ -193,18 +247,22 @@ def main(args):
         img = cv2.resize(mask_tile, (args.size, args.size))
         img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
         cv2.imwrite(save_path, img)
-    ''' 
-        
-if __name__ == '__main__':
+    """
+
+
+if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument('-s', '--size', help='image size',
-                        type=int, required=False, default=256)
-    parser.add_argument('-sd', '--save_dir', help='path to log',
-                        type=str, required=True)
-    parser.add_argument('-dd', '--data_dir', help='path to data dir',
-                        type=str, required=True)
-    
-    #args = parser.parse_args(['-dd', '../input/prostate-cancer-grade-assessment/', '-sd','../working'])
+    parser.add_argument(
+        "-s", "--size", help="image size", type=int, required=False, default=256
+    )
+    parser.add_argument(
+        "-sd", "--save_dir", help="path to log", type=str, required=True
+    )
+    parser.add_argument(
+        "-dd", "--data_dir", help="path to data dir", type=str, required=True
+    )
+
+    # args = parser.parse_args(['-dd', '../input/prostate-cancer-grade-assessment/', '-sd','../working'])
     args = parser.parse_args()
 
     main(args)
