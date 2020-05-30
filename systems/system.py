@@ -142,7 +142,7 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
             labels=range(self.num_classes),
         )
 
-        #print(metrics.confusion_matrix(y, preds, labels=range(self.num_classes)))
+        # print(metrics.confusion_matrix(y, preds, labels=range(self.num_classes)))
         lazy_acc = lazy_accuracy(y, preds, num_classes=self.num_classes, verbose=True)
 
         log = {
@@ -152,7 +152,7 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
             "karolinska_qwk": karolinska_qwk,
             "radboud_qwk": radboud_qwk,
             "sample_qwk": sample_qwk,
-            "lazy_acc": lazy_acc
+            "lazy_acc": lazy_acc,
         }
 
         return {"avg_val_loss": avg_loss, "log": log}
