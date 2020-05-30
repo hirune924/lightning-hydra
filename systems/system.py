@@ -35,7 +35,9 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
         super(PLRegressionImageClassificationSystem, self).__init__()
         self.hparams = OmegaConf.to_container(hparams, resolve=True)
         self.model = model
+        self.num_classes = hparams.training.num_classes
         self.criteria = get_loss(hparams)
+        self.y2pred = hparams.training.y2pred
 
     def forward(self, x):
         return self.model(x)
@@ -45,7 +47,7 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
         # REQUIRED
         x, y, _, _ = batch
         y_hat = self.forward(x)
-        loss = self.criteria(y_hat, y.view(-1, 1).float())
+        loss = self.criteria(y_hat, y)
         loss = loss.unsqueeze(dim=-1)
         log = {'train_loss': loss}
         return {'loss': loss, 'log': log}
@@ -73,7 +75,8 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
         # OPTIONAL
         x, y, data_provider, gleason_score = batch
         y_hat = self.forward(x)
-        val_loss = self.criteria(y_hat, y.view(-1, 1).float())
+        #val_loss = self.criteria(y_hat, y.view(-1, 1))
+        val_loss = self.criteria(y_hat, y)
         val_loss = val_loss.unsqueeze(dim=-1)
 
         return {'val_loss': val_loss, 'y': y, 'y_hat': y_hat, 'data_provider': data_provider, 'gleason_score':gleason_score}
@@ -88,17 +91,19 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
         data_provider = torch.cat([x['data_provider'] for x in outputs]).cpu().detach().numpy().copy()
         gleason_score = torch.cat([x['gleason_score'] for x in outputs]).cpu().detach().numpy().copy()
 
-        #preds = np.argmax(y_hat, axis=1)
-        preds = preds_rounder(y_hat, self.hparams['training']['num_classes'])
+        if self.y2pred == 'round':
+            preds = preds_rounder(y_hat, self.num_classes)
+        elif self.y2pred == 'argmax':
+            preds = np.argmax(y_hat, axis=1)
 
         val_acc = metrics.accuracy_score(y, preds)
         val_qwk = metrics.cohen_kappa_score(y, preds, weights='quadratic')
-        karolinska_qwk = metrics.cohen_kappa_score(y[data_provider==0], preds[data_provider==0], weights='quadratic', labels=range(6))
-        radboud_qwk = metrics.cohen_kappa_score(y[data_provider==1], preds[data_provider==1], weights='quadratic', labels=range(6))
+        karolinska_qwk = metrics.cohen_kappa_score(y[data_provider==0], preds[data_provider==0], weights='quadratic', labels=range(self.num_classes))
+        radboud_qwk = metrics.cohen_kappa_score(y[data_provider==1], preds[data_provider==1], weights='quadratic', labels=range(self.num_classes))
         sample_idx = (gleason_score != 0) & (gleason_score != 1) & (gleason_score != 2)
-        sample_qwk =  metrics.cohen_kappa_score(y[sample_idx], preds[sample_idx], weights='quadratic', labels=range(6))
+        sample_qwk =  metrics.cohen_kappa_score(y[sample_idx], preds[sample_idx], weights='quadratic', labels=range(self.num_classes))
 
-        print(metrics.confusion_matrix(y, preds, labels=range(6)))
+        print(metrics.confusion_matrix(y, preds, labels=range(self.num_classes)))
 
         log = {'avg_val_loss': avg_loss, 'val_acc': val_acc, 'val_qwk': val_qwk,
          'karolinska_qwk': karolinska_qwk, 'radboud_qwk': radboud_qwk, 'sample_qwk': sample_qwk}
@@ -124,7 +129,7 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
         y_hat = torch.cat([x['y_hat'] for x in outputs]).cpu().detach().numpy().copy()
 
         #preds = np.argmax(y_hat, axis=1)
-        preds = preds_rounder(y_hat, self.hparams['training']['num_classes'])
+        preds = preds_rounder(y_hat, self.num_classes)
         test_acc = metrics.accuracy_score(y, preds)
         test_qwk = metrics.cohen_kappa_score(y, preds, weights='quadratic')
 
@@ -154,5 +159,3 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
     def test_dataloader(self):
         # OPTIONAL
         return DataLoader(self.valid_dataset, **self.hparams['training']['dataloader']['valid'])
-
-

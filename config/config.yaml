@@ -22,6 +22,7 @@ dataset:
     data_dir: ../data
     image_size: 224
     load_type: png # tiff_tile
+    target_type: float
     split:
         class_name: sklearn.model_selection.StratifiedKFold
         params: 
@@ -63,9 +64,10 @@ dataset:
 
 training:
     debug: false
-    num_classes: 5
+    num_classes: 6
     batch_size: 32
     learning_rate: 1e-4
+    y2pred: round
     loss: 
       class_name: losses.loss.RMSELoss
       params: {}
@@ -123,7 +125,7 @@ logging:
 callbacks:
   model_checkpoint:
     filepath: ${logging.log_dir}/fold${dataset.fold}-{epoch}-{avg_val_loss}-{val_qwk}
-    save_top_k: 10
+    save_top_k: 20
     verbose: true
     monitor: avg_val_loss
     mode: min

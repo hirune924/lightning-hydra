@@ -28,7 +28,7 @@ def load_obj(obj_path: str, default_obj_path: str = "") -> Any:
 
 def preds_rounder(test_preds, num_class):
     #print(np.floor(np.clip(test_preds + 0.5, 0, num_class)))
-    test_preds = np.floor(np.clip(test_preds + 0.5, 0, num_class))
+    test_preds = np.floor(np.clip(test_preds + 0.5, 0, num_class-1))
     return test_preds
 
 def flatten_dict(d, parent_key='', sep='/'):

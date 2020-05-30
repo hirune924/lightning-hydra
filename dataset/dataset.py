@@ -56,13 +56,15 @@ def get_datasets(cfg: DictConfig) -> dict:
                                   cfg.dataset.data_dir,
                                   transform=train_augs,
                                   load_type=cfg.dataset.load_type,
-                                  train=True)
+                                  train=True,
+                                  target_type=cfg.dataset.target_type)
 
     valid_dataset = PANDADataset(valid_df,
                                   cfg.dataset.data_dir,
                                   transform=valid_augs,
                                   load_type=cfg.dataset.load_type,
-                                  train=False)
+                                  train=False,
+                                  target_type=cfg.dataset.target_type)
 
     return {'train': train_dataset, 'valid': valid_dataset}
 
@@ -70,7 +72,7 @@ def get_datasets(cfg: DictConfig) -> dict:
 class PANDADataset(Dataset):
     """PANDA Dataset."""
     
-    def __init__(self, dataframe, data_dir, transform=None, load_type='png', train=True):
+    def __init__(self, dataframe, data_dir, transform=None, load_type='png', train=True, target_type='float'):
         """
         Args:
             data_path (string): data path(glob_pattern) for dataset images
@@ -81,6 +83,7 @@ class PANDADataset(Dataset):
         self.data_dir = data_dir
         self.load_type = load_type
         self.train = train
+        self.target_type=target_type
         
     def __len__(self):
         return len(self.data)
@@ -99,11 +102,14 @@ class PANDADataset(Dataset):
         gleason_score = self.data.loc[idx, 'gleason_score']
         isup_grade = self.data.loc[idx, 'isup_grade']
         
-
-
         if self.transform:
             image = self.transform(image=image)
             image = torch.from_numpy(image['image'].transpose(2, 0, 1))
+
+        if self.target_type == 'float':
+            isup_grade = torch.Tensor([isup_grade]).float()
+        elif self.target_type == 'long':
+            isup_grade = isup_grade
         return image, isup_grade, data_provider2id(data_provider), gleason2id(gleason_score)
 
 def data_provider2id(data_provider):
