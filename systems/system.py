@@ -19,7 +19,7 @@ from losses.loss import get_loss
 from optimizer.optimizer import get_optimizer
 from scheduler.scheduler import get_scheduler
 from dataset.dataset import get_datasets
-from metrics.metric import lazy_accuracy
+from metrics.metric import lazy_accuracy, monitored_cohen_kappa_score
 
 from omegaconf import DictConfig, OmegaConf
 
@@ -121,7 +121,8 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
             preds = np.argmax(y_hat, axis=1)
 
         val_acc = metrics.accuracy_score(y, preds)
-        val_qwk = metrics.cohen_kappa_score(y, preds, weights="quadratic")
+
+        val_qwk, qwk_o, qwk_e = monitored_cohen_kappa_score(y, preds, weights="quadratic")
         karolinska_qwk = metrics.cohen_kappa_score(
             y[data_provider == 0],
             preds[data_provider == 0],
@@ -142,8 +143,6 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
             labels=range(self.num_classes),
         )
 
-        lazy_acc = lazy_accuracy(y, preds, num_classes=self.num_classes, verbose=True)
-
         log = {
             "avg_val_loss": avg_loss,
             "val_acc": val_acc,
@@ -151,7 +150,8 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
             "karolinska_qwk": karolinska_qwk,
             "radboud_qwk": radboud_qwk,
             "sample_qwk": sample_qwk,
-            "lazy_acc": lazy_acc
+            "val_qwk_o": qwk_o,
+            "val_qwk_e": qwk_e
         }
 
         return {"avg_val_loss": avg_loss, "log": log}

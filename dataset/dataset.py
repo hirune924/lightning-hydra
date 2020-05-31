@@ -133,9 +133,9 @@ class PANDADataset(Dataset):
                 )
             )
             scale_rand = (
-                np.clip(np.random.normal(loc=2, scale=1, size=1), 0.5, 3.5)
+                np.clip(np.random.normal(loc=1, scale=0.25, size=1), 0.5, 1.5)
                 if self.train
-                else 2.0
+                else 1.0
             )
             image = load_img(img_name, K=16, scaling_factor=scale_rand, layer=1)
         data_provider = self.data.loc[idx, "data_provider"]
