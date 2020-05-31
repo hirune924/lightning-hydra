@@ -13,7 +13,7 @@ def lazy_accuracy(y, preds, num_classes=6, verbose=False):
 
 
 def monitored_cohen_kappa_score(y1, y2, labels=None, weights=None,
-                      sample_weight=None):
+                      sample_weight=None, verbose=False):
     confusion = metrics.confusion_matrix(y1, y2, labels=labels,
                                  sample_weight=sample_weight)
     n_classes = confusion.shape[0]
@@ -37,6 +37,6 @@ def monitored_cohen_kappa_score(y1, y2, labels=None, weights=None,
     o = np.sum(w_mat * confusion)/(np.sum(confusion)*n_classes*n_classes)
     e = np.sum(w_mat * expected)/(np.sum(confusion)*n_classes*n_classes)
     k = o / e
-    
-    print(confusion)
+    if verbose:
+        print(confusion)
     return 1 - k, o, e
