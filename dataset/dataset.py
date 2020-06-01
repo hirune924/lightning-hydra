@@ -137,6 +137,7 @@ class PANDADataset(Dataset):
                 if self.train
                 else 1.0
             )
+            scale_rand = 1.0 ### For Debug!!!!!!!!!!!
             image = load_img(img_name, K=16, scaling_factor=scale_rand, layer=1)
         data_provider = self.data.loc[idx, "data_provider"]
         gleason_score = self.data.loc[idx, "gleason_score"]
