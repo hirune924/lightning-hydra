@@ -74,7 +74,7 @@ def detect_best_window_size(image, K=16, scaling_factor=1.0):
     # print(ratio_white_pixels, green_concentration, blue_concentration)
     h, w = image.shape[:2]
     return max(
-        int(np.sqrt(h * w * (1.0 - ratio_white_pixels) * scaling_factor / K)), 30
+        int(np.sqrt(h * w * (1.0 - ratio_white_pixels) * scaling_factor / K)), 32
     )
 
 
