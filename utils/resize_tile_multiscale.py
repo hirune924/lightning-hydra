@@ -13,7 +13,7 @@ import numpy as np
 
 import openslide
 
-from utils.resize_intl_tile import load_img
+from resize_intl_tile import load_img
 
 
 def main(args):
