@@ -71,6 +71,11 @@ def get_datasets(cfg: DictConfig) -> dict:
         load_type=cfg.dataset.load_type,
         train=True,
         target_type=cfg.dataset.target_type,
+        K=cfg.dataset.K,
+        auto_ws=cfg.dataset.auto_ws,
+        window_size=cfg.dataset.window_size,
+        layer=cfg.dataset.layer,
+        scale_aug=cfg.dataset.scale_aug
     )
 
     valid_dataset = PANDADataset(
@@ -80,6 +85,11 @@ def get_datasets(cfg: DictConfig) -> dict:
         load_type=cfg.dataset.load_type,
         train=False,
         target_type=cfg.dataset.target_type,
+        K=cfg.dataset.K,
+        auto_ws=cfg.dataset.auto_ws,
+        window_size=cfg.dataset.window_size,
+        layer=cfg.dataset.layer,
+        scale_aug=cfg.dataset.scale_aug
     )
 
     return {"train": train_dataset, "valid": valid_dataset}
@@ -96,6 +106,11 @@ class PANDADataset(Dataset):
         load_type="png",
         train=True,
         target_type="float",
+        K=16,
+        auto_ws=True,
+        window_size=128,
+        layer=0,
+        scale_aug=True
     ):
         """
         Args:
@@ -110,6 +125,11 @@ class PANDADataset(Dataset):
         self.load_type = load_type
         self.train = train
         self.target_type = target_type
+        self.auto_ws = auto_ws
+        self.window_size = window_size
+        self.layer = layer
+        self.scale_aug = scale_aug
+        self.K = K
 
     def __len__(self):
         return len(self.data)
@@ -132,13 +152,15 @@ class PANDADataset(Dataset):
                     self.data.loc[idx, "image_id"] + "." + "tiff",
                 )
             )
-            scale_rand = (
-                np.clip(np.random.normal(loc=1, scale=0.25, size=1), 0.5, 1.5)
-                if self.train
-                else 1.0
-            )
-            ###scale_rand = 1.0 ### For Debug!!!!!!!!!!!
-            image = load_img(img_name, K=16, scaling_factor=scale_rand, layer=0)
+            if self.scale_aug:
+                scale_factor = (
+                    np.clip(np.random.normal(loc=1, scale=0.25, size=1), 0.5, 1.5)
+                    if self.train
+                    else 1.0
+                )
+            else:
+                scale_factor = 1.0
+            image = load_img(img_name, K=self.K, scaling_factor=scale_factor, layer=self.layer, auto_ws=self.auto_ws, window_size=self.window_size)
         data_provider = self.data.loc[idx, "data_provider"]
         gleason_score = self.data.loc[idx, "gleason_score"]
         isup_grade = self.data.loc[idx, "isup_grade"]

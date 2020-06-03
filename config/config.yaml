@@ -23,6 +23,11 @@ dataset:
     image_size: 224
     load_type: png # tiff_tile
     target_type: float
+    K: 16
+    auto_ws: true
+    window_size: 128
+    layer: 0
+    scale_aug: true
     split:
         class_name: sklearn.model_selection.StratifiedKFold
         params: 

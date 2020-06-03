@@ -184,16 +184,16 @@ def glue_to_one_picture(image_patches, window_size=200, k=16):
     return image
 
 
-def load_img(img_name, K=16, scaling_factor=1.0, layer=0):
-    WINDOW_SIZE = 128
-    STRIDE = 128
+def load_img(img_name, K=16, scaling_factor=1.0, layer=0, auto_ws=True, window_size=128):
+    WINDOW_SIZE = window_size
+    STRIDE = window_size
     # K = 16
     image, best_coordinates, best_regions, win = generate_patches(
         img_name,
         window_size=WINDOW_SIZE,
         stride=STRIDE,
         k=K,
-        auto_ws=True,
+        auto_ws=auto_ws,
         scaling_factor=scaling_factor,
     )
     WINDOW_SIZE = win

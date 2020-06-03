@@ -9,6 +9,7 @@
     * np.clip(np.random.normal(loc=1, scale=0.5, size=1), 0.5,3.5)
 * pool4x4 （様子見、良くも悪くもない、サブするほどでも無い感）
 * GeM
+* 学習の高速化（次の日にはサブできるくらいに）
 
 # improve task
 * korniaによるDA高速化
