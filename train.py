@@ -29,7 +29,7 @@ def main(cfg: DictConfig) -> None:
 
     model = get_model(cfg)
     if cfg.model.ckpt_path is not None:
-        ckpt_pth = glob.glob(utils.to_absolute_path(cfg.model.chpt_path))
+        ckpt_pth = glob.glob(utils.to_absolute_path(cfg.model.ckpt_path))
         model = load_pytorch_model(ckpt_pth[0], model)
 
     seed_everything(2020)
