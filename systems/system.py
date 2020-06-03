@@ -63,7 +63,7 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
         optimizer = get_optimizer(self.model.parameters(), self.hparams)
 
         scheduler = get_scheduler(optimizer, self.hparams)
-        return [optimizer], [{"scheduler": scheduler, "monitor": "avg_val_loss"}]
+        return [optimizer], [{"scheduler": scheduler, "monitor": "avg_val_loss", 'interval': self.hparams['training']['scheduler']['interval']}]
 
     def optimizer_step(
         self,

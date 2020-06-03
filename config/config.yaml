@@ -93,8 +93,13 @@ training:
       class_name: torch.optim.Adam
       params: {lr: '${training.learning_rate}'}
     scheduler:
-      class_name: torch.optim.lr_scheduler.ReduceLROnPlateau
-      params: {mode: min, factor: 0.5, patience: 5, verbose: true, eps: 1e-8}  
+      #class_name: torch.optim.lr_scheduler.ReduceLROnPlateau
+      #params: {mode: min, factor: 0.5, patience: 5, verbose: true, eps: 1e-8} 
+      #interval: epoch 
+      class_name: torch.optim.lr_scheduler.CyclicLR
+      params: {base_lr: 1e-6, max_lr: 3e-5, step_size_up: 400, step_size_down: 661, mode: exp_range, gamma: 0.99994, cycle_momentum: false} 
+      #params: {base_lr: 1e-5, max_lr: 1e-4, step_size_up: 100, step_size_down: 165, mode: exp_range, gamma: 0.99994, cycle_momentum: false} 
+      interval: step
     dataloader:
       train: {batch_size: '${training.batch_size}', shuffle: true, num_workers: 4, pin_memory: true, drop_last: true}  
       valid: {batch_size: '${training.batch_size}', shuffle: false, num_workers: 4, pin_memory: true, drop_last: true} 
