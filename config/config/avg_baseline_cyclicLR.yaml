@@ -20,6 +20,6 @@ model:
 training:
     scheduler:
         class_name: torch.optim.lr_scheduler.CyclicLR
-        params: {base_lr: 1e-6, max_lr: 3e-5, step_size_up: 400, step_size_down: 661, mode: exp_range, gamma: 0.99994, cycle_momentum: false} 
+        params: {base_lr: 5e-6, max_lr: 1e-4, step_size_up: 400, step_size_down: 661, mode: exp_range, gamma: 0.99994, cycle_momentum: false} 
         #params: {base_lr: 1e-5, max_lr: 1e-4, step_size_up: 100, step_size_down: 165, mode: exp_range, gamma: 0.99994, cycle_momentum: false} 
         interval: step

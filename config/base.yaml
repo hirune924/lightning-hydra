@@ -1,163 +1,163 @@
 hydra:
-	run:
-		dir: outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}
-	sweep:
-		dir: multirun/${now:%Y-%m-%d}/${now:%H-%M-%S}
-		subdir: ${hydra.job.num}
+    run:
+        dir: outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}
+    sweep:
+        dir: multirun/${now:%Y-%m-%d}/${now:%H-%M-%S}
+        subdir: ${hydra.job.num}
 
 
 private:
-		#neptune_api: ANONIMOUS
-		neptune_api: 'eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vdWkubmVwdHVuZS5haSIsImFwaV91cmwiOiJodHRwczovL3VpLm5lcHR1bmUuYWkiLCJhcGlfa2V5IjoiN2I2ZWM0NmQtNjg0NS00ZjM5LTkzNTItN2I4Nzc0YTUzMmM0In0='
+    #neptune_api: ANONIMOUS
+    neptune_api: 'eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vdWkubmVwdHVuZS5haSIsImFwaV91cmwiOiJodHRwczovL3VpLm5lcHR1bmUuYWkiLCJhcGlfa2V5IjoiN2I2ZWM0NmQtNjg0NS00ZjM5LTkzNTItN2I4Nzc0YTUzMmM0In0='
 
 
 model:
-		class_name: model.model.resnet18
-		params:
-				pretrained: true
-				num_classes: 1
-		ckpt_path: null
-		
+    class_name: model.model.resnet18
+    params:
+        pretrained: true
+        num_classes: 1
+    ckpt_path: null
+        
 dataset: 
-		data_dir: ../data
-		image_size: 224
-		load_type: png # tiff_tile
-		target_type: float
-		K: 16
-		auto_ws: true
-		window_size: 128
-		layer: 0
-		scale_aug: true
-		split:
-				class_name: sklearn.model_selection.StratifiedKFold
-				params: 
-						n_splits: 5
-						shuffle: true
-						random_state: 2020
-		fold: 0
-		augmentation:
-				train:
-						#- class_name: albumentations.RandomGridShuffle
-						#    params: {grid: [4, 4], always_apply: false, p: 1.0}
-						#- class_name: albumentations.RandomResizedCrop
-						#    params: {height: '${dataset.image_size}', width: '${dataset.image_size}', scale: [0.8, 1.0], ratio: [0.75, 1.33], interpolation: 1, always_apply: false, p: 1.0}
-						#- class_name: albumentations.Flip
-						#    params: {always_apply: false, p: 0.5}
-						#- class_name: albumentations.HueSaturationValue
-						#    params: {hue_shift_limit: 10, sat_shift_limit: 10, val_shift_limit: 10, always_apply: false, p: 0.5}
-						#- class_name: albumentations.RandomBrightnessContrast
-						#    params: {brightness_limit: 0.2, contrast_limit: 0.2, brightness_by_max: true, always_apply: false, p: 0.5}
-						#- class_name: albumentations.GaussNoise
-						#    params: {var_limit: [10.0, 50.0], mean: 0, always_apply: false, p: 0.5}
-						#- class_name: albumentations.ShiftScaleRotate
-						#    params: {shift_limit: 0.0625, scale_limit: 0.0, rotate_limit: 45, interpolation: 1, border_mode: 4, value: 255, mask_value: null, always_apply: false, p: 0.5}
-						#- class_name: albumentations.Cutout
-						#    params: {num_holes: 8, max_h_size: 80, max_w_size: 80, fill_value: 255, always_apply: false, p: 0.5}
-						#- class_name: albumentations.Normalize
-						#    params: {mean: [0.485, 0.456, 0.406], std: [0.229, 0.224, 0.225], max_pixel_value: 255.0, always_apply: false, p: 1.0}
+    data_dir: ../data
+    image_size: 224
+    load_type: png # tiff_tile
+    target_type: float
+    K: 16
+    auto_ws: true
+    window_size: 128
+    layer: 0
+    scale_aug: true
+    split:
+        class_name: sklearn.model_selection.StratifiedKFold
+        params: 
+            n_splits: 5
+            shuffle: true
+            random_state: 2020
+    fold: 0
+    augmentation:
+        train:
+            #- class_name: albumentations.RandomGridShuffle
+            #    params: {grid: [4, 4], always_apply: false, p: 1.0}
+            #- class_name: albumentations.RandomResizedCrop
+            #    params: {height: '${dataset.image_size}', width: '${dataset.image_size}', scale: [0.8, 1.0], ratio: [0.75, 1.33], interpolation: 1, always_apply: false, p: 1.0}
+            #- class_name: albumentations.Flip
+            #    params: {always_apply: false, p: 0.5}
+            #- class_name: albumentations.HueSaturationValue
+            #    params: {hue_shift_limit: 10, sat_shift_limit: 10, val_shift_limit: 10, always_apply: false, p: 0.5}
+            #- class_name: albumentations.RandomBrightnessContrast
+            #    params: {brightness_limit: 0.2, contrast_limit: 0.2, brightness_by_max: true, always_apply: false, p: 0.5}
+            #- class_name: albumentations.GaussNoise
+            #    params: {var_limit: [10.0, 50.0], mean: 0, always_apply: false, p: 0.5}
+            #- class_name: albumentations.ShiftScaleRotate
+            #    params: {shift_limit: 0.0625, scale_limit: 0.0, rotate_limit: 45, interpolation: 1, border_mode: 4, value: 255, mask_value: null, always_apply: false, p: 0.5}
+            #- class_name: albumentations.Cutout
+            #    params: {num_holes: 8, max_h_size: 80, max_w_size: 80, fill_value: 255, always_apply: false, p: 0.5}
+            #- class_name: albumentations.Normalize
+            #    params: {mean: [0.485, 0.456, 0.406], std: [0.229, 0.224, 0.225], max_pixel_value: 255.0, always_apply: false, p: 1.0}
 
-						- class_name: albumentations.Resize
-							params: {height: '${dataset.image_size}', width: '${dataset.image_size}', interpolation: 1, always_apply: true, p: 1.0}
-						- class_name: albumentations.RandomGridShuffle
-							params: {grid: [4, 4], always_apply: true, p: 1.0}
-						- class_name: albumentations.GridDropout
-							params: {ratio: 0.25, unit_size_min: null, unit_size_max: null, holes_number_x: 4, holes_number_y: 4, shift_x: 0, shift_y: 0, random_offset: True, fill_value: 255, mask_fill_value: null, always_apply: false, p: 0.1}
-						- class_name: albumentations.Cutout
-							params: {num_holes: 4, max_h_size: 200, max_w_size: 200, fill_value: 255, always_apply: false, p: 0.5}
-						- class_name: albumentations.GridDistortion
-							params: {num_steps: 4, distort_limit: 0.3, interpolation: 1, border_mode: 4, value: null, mask_value: null, always_apply: false, p: 0.5}
-						- class_name: albumentations.Flip
-							params: {always_apply: false, p: 0.5}
-						- class_name: albumentations.HueSaturationValue
-							params: {hue_shift_limit: 20, sat_shift_limit: 30, val_shift_limit: 20, always_apply: false, p: 0.5}
-						- class_name: albumentations.RandomBrightnessContrast
-							params: {brightness_limit: 0.2, contrast_limit: 0.2, brightness_by_max: true, always_apply: false, p: 0.5}
-						- class_name: albumentations.Normalize
-							params: {mean: [0.485, 0.456, 0.406], std: [0.229, 0.224, 0.225], max_pixel_value: 255.0, always_apply: false, p: 1.0}
-				valid: 
-						- class_name: albumentations.Resize
-							params: {height: '${dataset.image_size}', width: '${dataset.image_size}', interpolation: 1, always_apply: false, p: 1.0}
-						- class_name: albumentations.Normalize
-							params: {mean: [0.485, 0.456, 0.406], std: [0.229, 0.224, 0.225], max_pixel_value: 255.0, always_apply: false, p: 1.0}
+            - class_name: albumentations.Resize
+              params: {height: '${dataset.image_size}', width: '${dataset.image_size}', interpolation: 1, always_apply: true, p: 1.0}
+            - class_name: albumentations.RandomGridShuffle
+              params: {grid: [4, 4], always_apply: true, p: 1.0}
+            - class_name: albumentations.GridDropout
+              params: {ratio: 0.25, unit_size_min: null, unit_size_max: null, holes_number_x: 4, holes_number_y: 4, shift_x: 0, shift_y: 0, random_offset: True, fill_value: 255, mask_fill_value: null, always_apply: false, p: 0.1}
+            - class_name: albumentations.Cutout
+              params: {num_holes: 4, max_h_size: 200, max_w_size: 200, fill_value: 255, always_apply: false, p: 0.5}
+            - class_name: albumentations.GridDistortion
+              params: {num_steps: 4, distort_limit: 0.3, interpolation: 1, border_mode: 4, value: null, mask_value: null, always_apply: false, p: 0.5}
+            - class_name: albumentations.Flip
+              params: {always_apply: false, p: 0.5}
+            - class_name: albumentations.HueSaturationValue
+              params: {hue_shift_limit: 20, sat_shift_limit: 30, val_shift_limit: 20, always_apply: false, p: 0.5}
+            - class_name: albumentations.RandomBrightnessContrast
+              params: {brightness_limit: 0.2, contrast_limit: 0.2, brightness_by_max: true, always_apply: false, p: 0.5}
+            - class_name: albumentations.Normalize
+              params: {mean: [0.485, 0.456, 0.406], std: [0.229, 0.224, 0.225], max_pixel_value: 255.0, always_apply: false, p: 1.0}
+        valid: 
+            - class_name: albumentations.Resize
+              params: {height: '${dataset.image_size}', width: '${dataset.image_size}', interpolation: 1, always_apply: false, p: 1.0}
+            - class_name: albumentations.Normalize
+              params: {mean: [0.485, 0.456, 0.406], std: [0.229, 0.224, 0.225], max_pixel_value: 255.0, always_apply: false, p: 1.0}
 
 training:
-		debug: false
-		num_classes: 6
-		batch_size: 32
-		learning_rate: 1e-4
-		y2pred: round
-		loss: 
-			class_name: losses.loss.RMSELoss
-			params: {}
-		optimizer:
-			class_name: torch.optim.Adam
-			params: {lr: '${training.learning_rate}'}
-		scheduler:
-			class_name: torch.optim.lr_scheduler.ReduceLROnPlateau
-			params: {mode: min, factor: 0.5, patience: 5, verbose: true, eps: 1e-8} 
-			interval: epoch 
-			#class_name: torch.optim.lr_scheduler.CyclicLR
-			#params: {base_lr: 1e-6, max_lr: 3e-5, step_size_up: 400, step_size_down: 661, mode: exp_range, gamma: 0.99994, cycle_momentum: false} 
-			#params: {base_lr: 1e-5, max_lr: 1e-4, step_size_up: 100, step_size_down: 165, mode: exp_range, gamma: 0.99994, cycle_momentum: false} 
-			#interval: step
-		dataloader:
-			train: {batch_size: '${training.batch_size}', shuffle: true, num_workers: 4, pin_memory: true, drop_last: true}    
-			valid: {batch_size: '${training.batch_size}', shuffle: false, num_workers: 4, pin_memory: true, drop_last: true} 
+    debug: false
+    num_classes: 6
+    batch_size: 32
+    learning_rate: 1e-4
+    y2pred: round
+    loss: 
+        class_name: losses.loss.RMSELoss
+        params: {}
+    optimizer:
+        class_name: torch.optim.Adam
+        params: {lr: '${training.learning_rate}'}
+    scheduler:
+        #class_name: torch.optim.lr_scheduler.ReduceLROnPlateau
+        #params: {mode: min, factor: 0.5, patience: 5, verbose: true, eps: 1e-8} 
+        #interval: epoch 
+        class_name: scheduler.scheduler.CyclicLR
+        #params: {base_lr: 1e-6, max_lr: 3e-5, step_size_up: 400, step_size_down: 661, mode: exp_range, gamma: 0.99994, cycle_momentum: false} 
+        params: {base_lr: 1e-5, max_lr: 1e-4, mode: exp_range, gamma: 0.99994, cycle_momentum: false} 
+        interval: step
+    dataloader:
+        train: {batch_size: '${training.batch_size}', shuffle: true, num_workers: 4, pin_memory: true, drop_last: true}    
+        valid: {batch_size: '${training.batch_size}', shuffle: false, num_workers: 4, pin_memory: true, drop_last: true} 
 
 trainer:
-	accumulate_grad_batches: 1
-	amp_level: O1
-	auto_scale_batch_size: null # null | binsearch | power
-	auto_lr_find: false # 'training.learning_rate' # true
-	deterministic: false
-	benchmark: true
-	distributed_backend: dp
-	check_val_every_n_epoch: 1
-	profiler: false
-	fast_dev_run: false
-	gpus: -1
-	gradient_clip_val: 0.0
-	log_gpu_memory: null
-	log_save_interval: 1000 # 100
-	row_log_interval: 100 # 10
-	max_epochs: 100
-	min_epochs: 100
-	max_steps: null
-	min_steps: null
-	num_nodes: 1
-	precision: 32
+    accumulate_grad_batches: 1
+    amp_level: O1
+    auto_scale_batch_size: null # null | binsearch | power
+    auto_lr_find: false # 'training.learning_rate' # true
+    deterministic: false
+    benchmark: true
+    distributed_backend: dp
+    check_val_every_n_epoch: 1
+    profiler: false
+    fast_dev_run: false
+    gpus: -1
+    gradient_clip_val: 0.0
+    log_gpu_memory: null
+    log_save_interval: 1000 # 100
+    row_log_interval: 100 # 10
+    max_epochs: 100
+    min_epochs: 100
+    max_steps: null
+    min_steps: null
+    num_nodes: 1
+    precision: 32
 
 logging:
-	log_dir: logs
-	tb_logger:
-		save_dir: ${logging.log_dir}
-		name: default
-		version: null
-	neptune_logger:
-		api_key: ${private.neptune_api}
-		project_name: hirune924/kaggle-PANDA
-		close_after_fit: true
-		upload_source_files: ['*.py','*.ipynb','.hydra/*.yaml']
-		experiment_name: default
-		properties: null
-		#send_hardware_metrics: false
-		#upload_stdout: false
-		#upload_stderr: false
-		#run_monitoring_thread: false
-		
+    log_dir: logs
+    tb_logger:
+        save_dir: ${logging.log_dir}
+        name: default
+        version: null
+    neptune_logger:
+        api_key: ${private.neptune_api}
+        project_name: hirune924/kaggle-PANDA
+        close_after_fit: true
+        upload_source_files: ['*.py','*.ipynb','.hydra/*.yaml']
+        experiment_name: default
+        properties: null
+        #send_hardware_metrics: false
+        #upload_stdout: false
+        #upload_stderr: false
+        #run_monitoring_thread: false
+        
 callbacks:
-	model_checkpoint:
-		filepath: ${logging.log_dir}/fold${dataset.fold}-{epoch}-{avg_val_loss}-{val_qwk}
-		save_top_k: 20
-		verbose: true
-		monitor: avg_val_loss
-		mode: min
-		save_weights_only: true
-		period: 1
-	early_stop:
-		monitor: avg_val_loss
-		patience: 20
-		min_delta: 0.0
-		strict: True
-		verbose: True
-		mode: min
+    model_checkpoint:
+        filepath: ${logging.log_dir}/fold${dataset.fold}-{epoch}-{avg_val_loss}-{val_qwk}
+        save_top_k: 20
+        verbose: true
+        monitor: avg_val_loss
+        mode: min
+        save_weights_only: true
+        period: 1
+    early_stop:
+        monitor: avg_val_loss
+        patience: 20
+        min_delta: 0.0
+        strict: True
+        verbose: True
+        mode: min

@@ -4,6 +4,7 @@ from hydra import utils
 
 import glob
 from utils.utils import flatten_dict, load_pytorch_model
+from callback.callback import MyCallback
 from pytorch_lightning import Trainer, seed_everything
 from model.model import get_model
 from systems.system import PLRegressionImageClassificationSystem
@@ -27,6 +28,8 @@ def main(cfg: DictConfig) -> None:
     tb_logger = loggers.TensorBoardLogger(**cfg.logging.tb_logger)
 
     lr_logger = LearningRateLogger()
+
+    my_callback = MyCallback(cfg)
 
     model = get_model(cfg)
     if cfg.model.ckpt_path is not None:
@@ -52,7 +55,7 @@ def main(cfg: DictConfig) -> None:
         early_stop_callback=early_stop_callback,
         logger=[tb_logger, neptune_logger],
         # logger=[tb_logger],
-        callbacks=[lr_logger],
+        callbacks=[lr_logger, my_callback],
         **cfg.trainer
     )
 
