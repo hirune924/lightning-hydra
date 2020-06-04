@@ -1,0 +1,31 @@
+hydra:
+    run:
+        dir: /kqi/output/fold_${dataset.fold}
+
+dataset: 
+    data_dir: /kqi/parent
+    fold: 1
+
+trainer:
+    distributed_backend: dp
+    precision: 16
+    batch_size: 8
+    image_size: 2048
+    num_sanity_val_steps: 5
+
+model:
+    class_name: model.model.se_resnet50
+    params: {num_classes: 6, pool: avg, pool_size: 1, pretrained: null}
+
+training:
+    loss:
+        class_name: torch.nn.CrossEntropyLoss
+    y2pred: argmax
+    scheduler:
+        class_name: scheduler.scheduler.CyclicLR
+        params: {base_lr: 0.005, max_lr: 0.1, mode: exp_range, gamma: 0.99994} 
+        interval: step
+    optimizer:
+        class_name: torch.optim.SGD
+        params: {lr: 0.1}
+
