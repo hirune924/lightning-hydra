@@ -5,6 +5,7 @@ hydra:
 dataset: 
     data_dir: /kqi/parent
     fold: 1
+    target_type: long
 
 trainer:
     distributed_backend: dp
