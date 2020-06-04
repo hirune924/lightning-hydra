@@ -1,0 +1,25 @@
+hydra:
+    run:
+        dir: /kqi/output/fold_${dataset.fold}
+
+dataset: 
+    data_dir: /kqi/parent
+    fold: 1
+
+trainer:
+    distributed_backend: dp
+    precision: 16
+    batch_size: 8
+    image_size: 2048
+    num_sanity_val_steps: 5
+
+model:
+    class_name: model.model.se_resnet50
+    params: {num_classes: 1, pool: avg, pool_size: 1, pretrained: /kqi/input/training/22466428/se_resnet50-ce0d4300.pth}
+
+training:
+    scheduler:
+        class_name: torch.optim.lr_scheduler.CyclicLR
+        params: {base_lr: 1e-6, max_lr: 3e-5, step_size_up: 400, step_size_down: 661, mode: exp_range, gamma: 0.99994, cycle_momentum: false} 
+        #params: {base_lr: 1e-5, max_lr: 1e-4, step_size_up: 100, step_size_down: 165, mode: exp_range, gamma: 0.99994, cycle_momentum: false} 
+        interval: step

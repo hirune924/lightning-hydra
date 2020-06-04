@@ -16,6 +16,7 @@ from logger.logger import CustomNeptuneLogger
 from pytorch_lightning import loggers
 
 
+#@hydra.main(config_path="config", strict=False)
 @hydra.main(config_path="config/config.yaml", strict=False)
 def main(cfg: DictConfig) -> None:
     print(cfg.pretty())
