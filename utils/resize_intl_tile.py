@@ -87,7 +87,7 @@ def generate_patches(
 
     if auto_ws:
         window_size = detect_best_window_size(
-            image, K=16, scaling_factor=scaling_factor
+            image, K=k, scaling_factor=scaling_factor
         )
         stride = window_size
 
@@ -167,6 +167,27 @@ def glue_to_one_picture_from_coord(url, coordinates, window_size=200, k=16, laye
     slide.close()
     return image
 
+def glue_to_one_picture_from_coord_lowlayer(url, coordinates, window_size=200, k=16, layer=1):
+    side = int(np.sqrt(k))
+    slide = openslide.OpenSlide(url)
+    lv2_scale = slide.level_downsamples[2]
+    scale = slide.level_downsamples[2] / slide.level_downsamples[layer]
+    # print(scale)
+    slide.close()
+    
+    slide = skimage.io.MultiImage(url)[layer]
+    slide = np.array(slide)
+
+    image = np.full((int(side * window_size * scale), int(side * window_size * scale), 3),255,dtype=np.uint8,)
+    # print(coordinates)
+    for i, patch_coord in enumerate(coordinates):
+        x = i // side
+        y = i % side
+        patch = slide[int(patch_coord[0] * scale): int(patch_coord[0] * scale) + int(window_size * scale),
+                      int(patch_coord[1] * scale): int(patch_coord[1] * scale) + int(window_size * scale),:]
+        image[int(x * window_size * scale) : int(x * window_size * scale) + int(window_size * scale),
+            int(y * window_size * scale) : int(y * window_size * scale) + int(window_size * scale),:,] = patch
+    return image
 
 def glue_to_one_picture(image_patches, window_size=200, k=16):
     side = int(np.sqrt(k))
@@ -200,9 +221,14 @@ def load_img(img_name, K=16, scaling_factor=1.0, layer=0, auto_ws=True, window_s
     STRIDE = WINDOW_SIZE
     # print(win)
     # glued_image = glue_to_one_picture(best_regions, window_size=WINDOW_SIZE, k=K)
-    glued_image = glue_to_one_picture_from_coord(
-        img_name, best_coordinates, window_size=WINDOW_SIZE, k=K, layer=layer
-    )
+    if layer == 0:
+        glued_image = glue_to_one_picture_from_coord(
+            img_name, best_coordinates, window_size=WINDOW_SIZE, k=K, layer=layer
+        )
+    else:
+        glued_image = glue_to_one_picture_from_coord_lowlayer(
+            img_name, best_coordinates, window_size=WINDOW_SIZE, k=K, layer=layer
+        )
     return glued_image
 
 
