@@ -20,7 +20,7 @@ trainer:
 
 model:
     class_name: timm.create_model
-    params: {model_name: tf_efficientnet_b3,　num_classes: 1, pretrained: true}
+    params: {model_name: tf_efficientnet_b3, num_classes: 1, pretrained: true}
 
 training:
     loss:
