@@ -28,10 +28,10 @@ training:
     y2pred: round
     scheduler:
         class_name: scheduler.scheduler.CyclicLR
-        params: {base_lr: 0.005, max_lr: 0.1, mode: exp_range, gamma: 0.99994} 
+        params: {base_lr: 5e-5, max_lr: 1e-4, mode: exp_range, gamma: 0.99997, cycle_momentum: false} 
         interval: step
     optimizer:
-        class_name: torch.optim.SGD
-        params: {lr: 0.1}
+        class_name: torch.optim.Adam
+        params: {lr: 1e-4}
     batch_size: 8
 

@@ -41,6 +41,8 @@
 
 # improve task
 * korniaによるDA高速化
+* base.yamlとoverride.yamlを分ける作業
+* monitored qwkの最後の正規化を修正（class-1に）
 
 # 完了タスク
 * 保存するckptを20に
