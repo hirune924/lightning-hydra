@@ -46,5 +46,5 @@ def se_resnet50(pretrained="imagenet", num_classes=1000, pool="avg", pool_size=1
         model.avg_pool = AdaptiveConcatPool2d(pool_size)
     elif pool == "gem":
         model.last_linear = nn.Linear(in_features, num_classes)
-        model.avg_pool = torch.nn.GeM() 
+        model.avg_pool = GeM() 
     return model
