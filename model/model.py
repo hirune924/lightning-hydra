@@ -11,6 +11,9 @@ from layer.layer import AdaptiveConcatPool2d, GeM
 import glob
 from hydra import utils
 
+import ssl
+ssl._create_default_https_context = ssl._create_unverified_context
+
 
 def get_model(cfg):
     model = load_obj(cfg.model.class_name)
