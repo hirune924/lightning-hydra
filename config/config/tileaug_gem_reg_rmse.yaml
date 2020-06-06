@@ -20,7 +20,7 @@ trainer:
 
 model:
     class_name: model.model.se_resnet50
-    params: {num_classes: １, pool: gem, pool_size: 1, pretrained: null}
+    params: {num_classes: 1, pool: gem, pool_size: 1, pretrained: null}
 
 training:
     loss:
