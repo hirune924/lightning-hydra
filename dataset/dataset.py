@@ -154,7 +154,7 @@ class PANDADataset(Dataset):
             )
             if self.scale_aug:
                 scale_factor = (
-                    np.clip(np.random.normal(loc=1, scale=0.25, size=1), 0.5, 1.5)
+                    np.clip(np.random.normal(loc=2.0, scale=1.0, size=1), 0.5, 3.5)
                     if self.train
                     else 1.0
                 )

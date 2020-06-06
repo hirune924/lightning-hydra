@@ -6,7 +6,7 @@ import torchvision.models as models
 import pretrainedmodels
 import segmentation_models_pytorch as smp
 
-from layer.layer import AdaptiveConcatPool2d
+from layer.layer import AdaptiveConcatPool2d, GeM
 
 import glob
 from hydra import utils
@@ -41,5 +41,7 @@ def se_resnet50(pretrained="imagenet", num_classes=1000, pool="avg", pool_size=1
     elif pool == "avgmax":
         model.last_linear = nn.Linear(in_features * 2 * (pool_size ** 2), num_classes)
         model.avg_pool = AdaptiveConcatPool2d(pool_size)
-
+    elif pool == "gem":
+        model.last_linear = nn.Linear(in_features, num_classes)
+        model.avg_pool = torch.nn.GeM() 
     return model

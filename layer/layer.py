@@ -15,3 +15,17 @@ class AdaptiveConcatPool2d(nn.Module):
 
     def forward(self, x):
         return torch.cat([self.mp(x), self.ap(x)], 1)
+
+
+
+def gem(x, p=3, eps=1e-6):
+    return nn.functional.avg_pool2d(x.clamp(min=eps).pow(p), (x.size(-2), x.size(-1))).pow(1.0 / p)
+
+class GeM(nn.Module):
+    def __init__(self, p=3, eps=1e-6):
+        super(GeM, self).__init__()
+        self.p = nn.Parameter(torch.ones(1) * p)
+        self.eps = eps
+
+    def forward(self, x):
+        return gem(x, p=self.p, eps=self.eps)
