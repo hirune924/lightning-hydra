@@ -12,6 +12,7 @@ import glob
 from hydra import utils
 
 import ssl
+
 ssl._create_default_https_context = ssl._create_unverified_context
 
 
@@ -30,7 +31,9 @@ def resnet18(pretrained=True, num_classes=1000):
     return model
 
 
-def se_resnet50(pretrained="imagenet", num_classes=1000, pool="avg", pool_size=1):
+def se_resnet50(
+    pretrained="imagenet", num_classes=1000, pool="avg", pool_size=1,
+):
     # model = pretrainedmodels.__dict__['se_resnet50'](num_classes=1000, pretrained='imagenet')
     model = pretrainedmodels.__dict__["se_resnet50"](num_classes=1000, pretrained=None)
     if pretrained is not None:
@@ -46,5 +49,5 @@ def se_resnet50(pretrained="imagenet", num_classes=1000, pool="avg", pool_size=1
         model.avg_pool = AdaptiveConcatPool2d(pool_size)
     elif pool == "gem":
         model.last_linear = nn.Linear(in_features, num_classes)
-        model.avg_pool = GeM() 
+        model.avg_pool = GeM()
     return model

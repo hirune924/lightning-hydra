@@ -17,14 +17,11 @@ from logger.logger import CustomNeptuneLogger
 from pytorch_lightning import loggers
 
 
-#@hydra.main(config_path="config", strict=False)
+# @hydra.main(config_path="config", strict=False)
 @hydra.main(config_path="config/config.yaml", strict=False)
 def main(cfg: DictConfig) -> None:
     print(cfg.pretty())
-    neptune_logger = CustomNeptuneLogger(
-        params=flatten_dict(OmegaConf.to_container(cfg, resolve=True)),
-        **cfg.logging.neptune_logger
-    )
+    neptune_logger = CustomNeptuneLogger(params=flatten_dict(OmegaConf.to_container(cfg, resolve=True)), **cfg.logging.neptune_logger)
     tb_logger = loggers.TensorBoardLogger(**cfg.logging.tb_logger)
 
     lr_logger = LearningRateLogger()
@@ -40,14 +37,10 @@ def main(cfg: DictConfig) -> None:
 
     lit_model = PLRegressionImageClassificationSystem(hparams=cfg, model=model)
 
-    checkpoint_callback_conf = OmegaConf.to_container(
-        cfg.callbacks.model_checkpoint, resolve=True
-    )
+    checkpoint_callback_conf = OmegaConf.to_container(cfg.callbacks.model_checkpoint, resolve=True)
     checkpoint_callback = ModelCheckpoint(**checkpoint_callback_conf)
 
-    early_stop_callback_conf = OmegaConf.to_container(
-        cfg.callbacks.early_stop, resolve=True
-    )
+    early_stop_callback_conf = OmegaConf.to_container(cfg.callbacks.early_stop, resolve=True)
     early_stop_callback = EarlyStopping(**early_stop_callback_conf)
 
     trainer = Trainer(

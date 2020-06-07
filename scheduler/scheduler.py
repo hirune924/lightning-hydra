@@ -15,5 +15,6 @@ def get_scheduler(optimizer, cfg):
 
     return scheduler
 
+
 def CyclicLR(optimizer, **cfg):
     return torch.optim.lr_scheduler.CyclicLR(optimizer, **cfg)

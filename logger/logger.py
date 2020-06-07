@@ -1,5 +1,12 @@
 from argparse import Namespace
-from typing import Optional, List, Dict, Any, Union, Iterable
+from typing import (
+    Optional,
+    List,
+    Dict,
+    Any,
+    Union,
+    Iterable,
+)
 
 from pytorch_lightning.logging.neptune import NeptuneLogger
 
