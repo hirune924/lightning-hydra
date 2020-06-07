@@ -34,8 +34,8 @@ def monitored_cohen_kappa_score(y1, y2, labels=None, weights=None,
     else:
         raise ValueError("Unknown kappa weighting type.")
 
-    o = np.sum(w_mat * confusion)/(np.sum(confusion)*n_classes*n_classes)
-    e = np.sum(w_mat * expected)/(np.sum(confusion)*n_classes*n_classes)
+    o = np.sum(w_mat * confusion)/(np.sum(confusion)*((n_classes - 1)**2))
+    e = np.sum(w_mat * expected)/(np.sum(confusion)*((n_classes - 1)**2))
     k = o / e
     if verbose:
         print(confusion)

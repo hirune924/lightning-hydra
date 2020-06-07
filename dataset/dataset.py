@@ -156,10 +156,10 @@ class PANDADataset(Dataset):
                 scale_factor = (
                     np.clip(np.random.normal(loc=2.0, scale=1.0, size=1), 0.5, 3.5)
                     if self.train
-                    else 1.0
+                    else 2.0
                 )
             else:
-                scale_factor = 1.0
+                scale_factor = 2.0
             image = load_img(img_name, K=self.K, scaling_factor=scale_factor, layer=self.layer, auto_ws=self.auto_ws, window_size=self.window_size)
         data_provider = self.data.loc[idx, "data_provider"]
         gleason_score = self.data.loc[idx, "gleason_score"]
