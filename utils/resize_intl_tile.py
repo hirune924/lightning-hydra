@@ -185,8 +185,10 @@ def glue_to_one_picture_from_coord_lowlayer(url, coordinates, window_size=200, k
         y = i % side
         patch = slide[int(patch_coord[0] * scale): int(patch_coord[0] * scale) + int(window_size * scale),
                       int(patch_coord[1] * scale): int(patch_coord[1] * scale) + int(window_size * scale),:]
-        image[int(x * window_size * scale) : int(x * window_size * scale) + int(window_size * scale),
-            int(y * window_size * scale) : int(y * window_size * scale) + int(window_size * scale),:,] = patch
+        #image[int(x * window_size * scale) : int(x * window_size * scale) + int(window_size * scale),
+        #    int(y * window_size * scale) : int(y * window_size * scale) + int(window_size * scale),:,] = patch
+        image[int(x * window_size * scale) : int(x * window_size * scale) + patch.shape[0],
+            int(y * window_size * scale) : int(y * window_size * scale) + patch.shape[1],:,] = patch
     return image
 
 def glue_to_one_picture(image_patches, window_size=200, k=16):
