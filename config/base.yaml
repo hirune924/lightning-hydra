@@ -30,6 +30,7 @@ dataset:
         class_name: sklearn.model_selection.StratifiedKFold
         params: {}
     fold: 0
+    cleansing: null
     augmentation:
         train:
             #- class_name: albumentations.RandomGridShuffle

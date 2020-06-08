@@ -30,6 +30,11 @@ def get_datasets(cfg: DictConfig) -> dict:
     cfg = OmegaConf.create(cfg)
     df = pd.read_csv(utils.to_absolute_path(os.path.join(cfg.dataset.data_dir, "train.csv")))
 
+    if cfg.cleansing is not None:
+        del_df = pd.read_csv(utils.to_absolute_path(cfg.cleansing))
+        for img_id in del_df['image_id']:
+            df = df[df['image_id'] != img_id]
+
     kf = load_obj(cfg.dataset.split.class_name)(**cfg.dataset.split.params)
 
     for fold, (train_index, val_index) in enumerate(kf.split(df.values, df["isup_grade"].astype(str) + df["data_provider"],)):
