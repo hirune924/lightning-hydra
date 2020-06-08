@@ -17,15 +17,6 @@ from utils.resize_intl_tile import load_img
 
 
 def get_datasets(cfg: DictConfig) -> dict:
-    """
-    Get datases for modelling
-
-    Args:
-        cfg: config
-
-    Returns:
-
-    """
 
     cfg = OmegaConf.create(cfg)
     df = pd.read_csv(utils.to_absolute_path(os.path.join(cfg.dataset.data_dir, "train.csv")))
@@ -37,7 +28,7 @@ def get_datasets(cfg: DictConfig) -> dict:
 
     kf = load_obj(cfg.dataset.split.class_name)(**cfg.dataset.split.params)
 
-    for fold, (train_index, val_index) in enumerate(kf.split(df.values, df["isup_grade"].astype(str) + df["data_provider"],)):
+    for　fold, (train_index, val_index) in enumerate(kf.split(df.values, df["isup_grade"].astype(str) + df["data_provider"],)):
         df.loc[val_index, "fold"] = int(fold)
     df["fold"] = df["fold"].astype(int)
 
