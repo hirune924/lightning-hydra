@@ -10,8 +10,7 @@ dataset:
     load_type: tiff_tile
     layer: 1
     split:
-        params: 
-            n_splits: 10
+        params: {n_splits: 10, shuffle: true, random_state: 2020}
 
 trainer:
     distributed_backend: dp
