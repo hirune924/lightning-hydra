@@ -41,7 +41,6 @@
 
 # improve task
 * korniaによるDA高速化
-* base.yamlとoverride.yamlを分ける作業
 
 # 完了タスク
 * 保存するckptを20に
@@ -52,3 +51,4 @@
     * 差分configファイルを適用できるように
 * 6class分類（様子見、なんかaccだけ異様に良い、サブしたら0.86、0.87のregressionと混ぜると0.88になった）
 * monitored qwkの最後の正規化を修正（class-1に）
+* base.yamlとoverride.yamlを分ける作業

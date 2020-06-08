@@ -13,9 +13,7 @@ private:
 
 model:
     class_name: model.model.resnet18
-    params:
-        pretrained: true
-        num_classes: 1
+    params: {}
     ckpt_path: null
         
 dataset: 
@@ -30,10 +28,7 @@ dataset:
     scale_aug: true
     split:
         class_name: sklearn.model_selection.StratifiedKFold
-        params: 
-            n_splits: 5
-            shuffle: true
-            random_state: 2020
+        params: {}
     fold: 0
     augmentation:
         train:
@@ -91,10 +86,10 @@ training:
         params: {}
     optimizer:
         class_name: torch.optim.Adam
-        params: {lr: '${training.learning_rate}'}
+        params: {}
     scheduler:
         class_name: torch.optim.lr_scheduler.ReduceLROnPlateau
-        #params: {mode: min, factor: 0.5, patience: 5, verbose: true, eps: 1e-8} 
+        params: {} 
         interval: epoch 
         #class_name: scheduler.scheduler.CyclicLR
         #params: {base_lr: 1e-6, max_lr: 3e-5, step_size_up: 400, step_size_down: 661, mode: exp_range, gamma: 0.99994, cycle_momentum: false} 
