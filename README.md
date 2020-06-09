@@ -2,6 +2,13 @@
 
 
 # Thought arrangement
+## Idea
+* co teaching
+* O2U-Net
+* Smooth L1 Loss
+* 強いモデルアーキテクチャ
+* あとは学習中に動的にラベルを更新していく系
+* (noise layer)
 
 ## input data
 * タイル化
