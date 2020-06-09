@@ -51,3 +51,30 @@ def se_resnet50(
         model.last_linear = nn.Linear(in_features, num_classes)
         model.avg_pool = GeM()
     return model
+
+
+def se_net(
+    model_name="se_resnet50", pretrained="imagenet", num_classes=1000, pool="avg", pool_size=1,
+):
+    # model = pretrainedmodels.__dict__['se_resnet50'](num_classes=1000, pretrained='imagenet')
+    if pretrained == 'imagenet':
+        model = pretrainedmodels.__dict__[model_name](num_classes=1000, pretrained='imagenet')
+    elif pretrained is not None :
+        model = pretrainedmodels.__dict__[model_name](num_classes=1000, pretrained=None)
+        ckpt_pth = glob.glob(utils.to_absolute_path(pretrained))
+        model.load_state_dict(torch.load(ckpt_pth[0]))
+    else:
+        model = pretrainedmodels.__dict__[model_name](num_classes=1000, pretrained=None)
+    
+
+    in_features = model.last_linear.in_features
+    if pool == "avg":
+        model.last_linear = nn.Linear(in_features * (pool_size ** 2), num_classes)
+        model.avg_pool = torch.nn.AdaptiveAvgPool2d(pool_size)
+    elif pool == "avgmax":
+        model.last_linear = nn.Linear(in_features * 2 * (pool_size ** 2), num_classes)
+        model.avg_pool = AdaptiveConcatPool2d(pool_size)
+    elif pool == "gem":
+        model.last_linear = nn.Linear(in_features, num_classes)
+        model.avg_pool = GeM()
+    return model
