@@ -9,6 +9,7 @@
 * 強いモデルアーキテクチャ
 * あとは学習中に動的にラベルを更新していく系
 * (noise layer)
+* cleanlab
 
 ## input data
 * タイル化
