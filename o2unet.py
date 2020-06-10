@@ -50,17 +50,18 @@ class O2UNetSystem(PLRegressionImageClassificationSystem):
         x, y, _, _, img_idx = batch
         y_hat = self.forward(x)
         loss = self.criteria(y_hat, y)
-        loss = loss.unsqueeze(dim=-1)
-        log = {"train_loss": loss}
+        #loss = loss.unsqueeze(dim=-1)
+        log = {"train_loss": loss.mean().unsqueeze(dim=-1)}
 
-        return {"loss": loss, "img_idx": img_idx, "log": log}
+        return {"loss": loss.mean().unsqueeze(dim=-1),"raw_loss": loss, "img_idx": img_idx, "log": log}
 
     def training_epoch_end(self, outputs):
         # OPTIONAL
         avg_loss = torch.stack([x["loss"] for x in outputs]).mean()
         img_idx_list = torch.cat([x["img_idx"] for x in outputs]).cpu().detach().numpy().copy()
+        raw_loss_list = torch.cat([x["raw_loss"] for x in outputs]).cpu().detach().numpy().copy()
 
-        pd.DataFrame({'img_idx':img_idx_list}).to_csv('epoch{}_losses.csv'.format(self.epoch))
+        pd.DataFrame({'img_idx':img_idx_list, 'loss': raw_loss_list}).to_csv('epoch{}_losses.csv'.format(self.epoch))
         self.epoch += 1
         log = {"avg_train_loss": avg_loss}
         return {"avg_train_loss": avg_loss, "log": log}
@@ -71,49 +72,19 @@ class O2UNetSystem(PLRegressionImageClassificationSystem):
         x, y, data_provider, gleason_score, img_idx  = batch
         y_hat = self.forward(x)
         # val_loss = self.criteria(y_hat, y.view(-1, 1))
-        val_loss = self.criteria(y_hat, y)
+        val_loss = self.criteria(y_hat, y).mean()
         val_loss = val_loss.unsqueeze(dim=-1)
 
         return {
             "val_loss": val_loss,
-            "y": y,
-            "y_hat": y_hat,
-            "data_provider": data_provider,
-            "gleason_score": gleason_score,
         }
 
     def validation_epoch_end(self, outputs):
         # OPTIONAL
         avg_loss = torch.stack([x["val_loss"] for x in outputs]).mean()
 
-        y = torch.cat([x["y"] for x in outputs]).cpu().detach().numpy().copy()
-        y_hat = torch.cat([x["y_hat"] for x in outputs]).cpu().detach().numpy().copy()
-
-        data_provider = torch.cat([x["data_provider"] for x in outputs]).cpu().detach().numpy().copy()
-        gleason_score = torch.cat([x["gleason_score"] for x in outputs]).cpu().detach().numpy().copy()
-
-        if self.y2pred == "round":
-            preds = preds_rounder(y_hat, self.num_classes)
-        elif self.y2pred == "argmax":
-            preds = np.argmax(y_hat, axis=1)
-
-        val_acc = metrics.accuracy_score(y, preds)
-
-        val_qwk, qwk_o, qwk_e = monitored_cohen_kappa_score(y, preds, weights="quadratic", verbose=True)
-        karolinska_qwk = metrics.cohen_kappa_score(y[data_provider == 0], preds[data_provider == 0], weights="quadratic", labels=range(self.num_classes),)
-        radboud_qwk = metrics.cohen_kappa_score(y[data_provider == 1], preds[data_provider == 1], weights="quadratic", labels=range(self.num_classes),)
-        sample_idx = (gleason_score != 0) & (gleason_score != 1) & (gleason_score != 2)
-        sample_qwk = metrics.cohen_kappa_score(y[sample_idx], preds[sample_idx], weights="quadratic", labels=range(self.num_classes),)
-
         log = {
             "avg_val_loss": avg_loss,
-            "val_acc": val_acc,
-            "val_qwk": val_qwk,
-            "karolinska_qwk": karolinska_qwk,
-            "radboud_qwk": radboud_qwk,
-            "sample_qwk": sample_qwk,
-            "val_qwk_o": qwk_o,
-            "val_qwk_e": qwk_e,
         }
 
         return {"avg_val_loss": avg_loss, "log": log}

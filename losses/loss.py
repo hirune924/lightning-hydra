@@ -15,8 +15,8 @@ def get_loss(cfg):
 
 
 class RMSELoss(torch.nn.Module):
-    def __init__(self):
-        super(RMSELoss, self).__init__()
+    def __init__(self, reduction='mean'):
+        super(RMSELoss, self).__init__(reduction=reduction)
 
     def forward(self, x, y):
         criterion = nn.MSELoss()

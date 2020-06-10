@@ -19,7 +19,7 @@ dataset:
 training:
     loss: 
         class_name: losses.loss.RMSELoss
-        params: {}
+        params: {reduction: 'none'}
     optimizer:
         class_name: torch.optim.SGD
         params: {lr: 1e-2}
