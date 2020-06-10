@@ -25,7 +25,7 @@ training:
         params: {lr: 1e-2}
     scheduler:
         class_name: torch.optim.lr_scheduler.CyclicLR
-        params: {base_lr: 1e-3, max_lr: 1e-2, mode: triangular, gamma: 0.99997, cycle_momentum: true, step_size_up: 5, step_size_down: 10} 
+        params: {base_lr: 1e-3, max_lr: 1e-2, mode: triangular, gamma: 0.99997, cycle_momentum: true, step_size_up: 2, step_size_down: 10} 
         interval: epoch
 
     dataloader:
@@ -37,3 +37,5 @@ trainer:
     distributed_backend: dp
     precision: 16
     num_sanity_val_steps: 5
+    max_epochs: 100
+    min_epochs: 100
