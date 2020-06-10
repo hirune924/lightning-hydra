@@ -1,0 +1,25 @@
+model:
+    class_name: model.model.resnet18
+    params: {pretrained: true , num_classes: 1}
+    ckpt_path: null
+
+dataset: 
+    split:
+        class_name: sklearn.model_selection.StratifiedKFold
+        params: {n_splits: 5, shuffle: true, random_state: 2020}
+
+training:
+    loss: 
+        class_name: losses.loss.RMSELoss
+        params: {}
+    optimizer:
+        class_name: torch.optim.SGD
+        params: {lr: 1e-2}
+    scheduler:
+        class_name: torch.optim.lr_scheduler.CyclicLR
+        params: {base_lr: 1e-3, max_lr: 1e-2, mode: triangular, gamma: 0.99997, cycle_momentum: true, step_size_up: 5, step_size_down: 10} 
+        interval: epoch
+
+    dataloader:
+        train: {batch_size: '${training.batch_size}', shuffle: true, num_workers: 4, pin_memory: true, drop_last: false}    
+        valid: {batch_size: '${training.batch_size}', shuffle: false, num_workers: 4, pin_memory: true, drop_last: false} 
