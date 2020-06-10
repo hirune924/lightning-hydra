@@ -47,22 +47,20 @@ class O2UNetSystem(PLRegressionImageClassificationSystem):
 
     def training_step(self, batch, batch_nb):
         # REQUIRED
-        x, y, _, _, img_id, img_idx = batch
+        x, y, _, _, img_idx = batch
         y_hat = self.forward(x)
         loss = self.criteria(y_hat, y)
         loss = loss.unsqueeze(dim=-1)
         log = {"train_loss": loss}
-        print(img_id)
-        print(img_idx)
-        return {"loss": loss, "img_id": img_id, "img_idx": img_idx, "log": log}
+
+        return {"loss": loss, "img_idx": img_idx, "log": log}
 
     def training_epoch_end(self, outputs):
         # OPTIONAL
         avg_loss = torch.stack([x["loss"] for x in outputs]).mean()
-        img_id_list = list(itertools.chain.from_iterable([x["img_id"] for x in outputs]))
         img_idx_list = torch.cat([x["img_idx"] for x in outputs]).cpu().detach().numpy().copy()
 
-        pd.DataFrame({'img_idx':img_idx_list, 'img_id':img_id_list}).to_csv('epoch{}_losses.csv'.format(self.epoch))
+        pd.DataFrame({'img_idx':img_idx_list}).to_csv('epoch{}_losses.csv'.format(self.epoch))
         self.epoch += 1
         log = {"avg_train_loss": avg_loss}
         return {"avg_train_loss": avg_loss, "log": log}
@@ -70,7 +68,7 @@ class O2UNetSystem(PLRegressionImageClassificationSystem):
     # For Validation
     def validation_step(self, batch, batch_nb):
         # OPTIONAL
-        x, y, data_provider, gleason_score, img_id, img_idx  = batch
+        x, y, data_provider, gleason_score, img_idx  = batch
         y_hat = self.forward(x)
         # val_loss = self.criteria(y_hat, y.view(-1, 1))
         val_loss = self.criteria(y_hat, y)
