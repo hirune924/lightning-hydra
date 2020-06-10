@@ -53,7 +53,7 @@ class O2UNetSystem(PLRegressionImageClassificationSystem):
         loss = loss.unsqueeze(dim=-1)
         log = {"train_loss": loss}
 
-        return {"loss": loss, "img_idx": img_idx, "log": log}
+        return {"loss": loss, "img_idx": img_idx.float(), "log": log}
 
     def training_epoch_end(self, outputs):
         # OPTIONAL
