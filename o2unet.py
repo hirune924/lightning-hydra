@@ -234,7 +234,6 @@ class PANDADataset(Dataset):
             isup_grade,
             data_provider2id(data_provider),
             gleason2id(gleason_score),
-            self.data.loc[idx, "image_id"],
             idx
         )
 
