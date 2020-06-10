@@ -1,3 +1,7 @@
+hydra:
+    run:
+        dir: /kqi/output/fold_${dataset.fold}
+
 model:
     class_name: timm.create_model
     params: {model_name: gluon_seresnext50_32x4d, num_classes: 1, pretrained: true}

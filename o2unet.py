@@ -137,7 +137,7 @@ def get_datasets(cfg: DictConfig) -> dict:
 
     #train_df = df[df["fold"] != cfg.dataset.fold]
     #valid_df = df[df["fold"] == cfg.dataset.fold]
-    train_df = df
+    train_df = df[:1001]
     valid_df = df[:32]
 
     train_augs_conf = OmegaConf.to_container(cfg.dataset.augmentation.train, resolve=True)
