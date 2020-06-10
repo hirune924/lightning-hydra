@@ -16,9 +16,10 @@ def get_loss(cfg):
 
 class RMSELoss(torch.nn.Module):
     def __init__(self, reduction='mean'):
-        super(RMSELoss, self).__init__(reduction=reduction)
+        super(RMSELoss, self).__init__()
+        self.reduction = reduction
 
     def forward(self, x, y):
-        criterion = nn.MSELoss()
+        criterion = nn.MSELoss(reduction=self.reduction)
         loss = torch.sqrt(criterion(x, y))
         return loss
