@@ -1,12 +1,16 @@
 model:
-    class_name: model.model.resnet18
-    params: {pretrained: true , num_classes: 1}
-    ckpt_path: null
+    class_name: timm.create_model
+    params: {model_name: gluon_seresnext50_32x4d, num_classes: 1, pretrained: true}
 
 dataset: 
+    data_dir: /kqi/parent
+    fold: 1
+    target_type: float # long
+    image_size: 2048
+    load_type: tiff_tile
+    layer: 1
     split:
-        class_name: sklearn.model_selection.StratifiedKFold
-        params: {n_splits: 5, shuffle: true, random_state: 2020}
+        params: {n_splits: 10, shuffle: true, random_state: 2020}
 
 training:
     loss: 
@@ -23,3 +27,9 @@ training:
     dataloader:
         train: {batch_size: '${training.batch_size}', shuffle: true, num_workers: 4, pin_memory: true, drop_last: false}    
         valid: {batch_size: '${training.batch_size}', shuffle: false, num_workers: 4, pin_memory: true, drop_last: false} 
+    batch_size: 8
+
+trainer:
+    distributed_backend: dp
+    precision: 16
+    num_sanity_val_steps: 5
