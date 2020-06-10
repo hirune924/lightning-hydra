@@ -60,7 +60,7 @@ class O2UNetSystem(PLRegressionImageClassificationSystem):
         avg_loss = torch.stack([x["loss"] for x in outputs]).mean()
         img_idx_list = torch.cat([x["img_idx"] for x in outputs]).cpu().detach().numpy().copy()
         raw_loss_list = torch.cat([x["raw_loss"] for x in outputs]).cpu().detach().numpy().copy()
-
+        print(raw_loss_list)
         pd.DataFrame({'img_idx':img_idx_list, 'loss': raw_loss_list}).to_csv('epoch{}_losses.csv'.format(self.epoch))
         self.epoch += 1
         log = {"avg_train_loss": avg_loss}
