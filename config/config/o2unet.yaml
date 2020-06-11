@@ -18,14 +18,16 @@ dataset:
 
 training:
     loss: 
-        class_name: losses.loss.RMSELoss
+        #class_name: losses.loss.RMSELoss
+        class_name: torch.nn.MSELoss
         params: {reduction: 'none'}
     optimizer:
         class_name: torch.optim.SGD
         params: {lr: 1e-2}
     scheduler:
         class_name: torch.optim.lr_scheduler.CyclicLR
-        params: {base_lr: 1e-3, max_lr: 1e-2, mode: triangular, gamma: 0.99997, cycle_momentum: true, step_size_up: 2, step_size_down: 10} 
+        params: {base_lr: 1e-3, max_lr: 1e-1, mode: triangular, gamma: 0.99997, cycle_momentum: true, step_size_up: 2, step_size_down: 10} 
+        #params: {base_lr: 1e-3, max_lr: 1e-2, mode: triangular, gamma: 0.99997, cycle_momentum: true, step_size_up: 2, step_size_down: 10} 
         interval: epoch
 
     dataloader:
