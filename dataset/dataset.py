@@ -35,11 +35,6 @@ def get_datasets(cfg: DictConfig) -> dict:
     train_df = df[df["fold"] != cfg.dataset.fold]
     valid_df = df[df["fold"] == cfg.dataset.fold]
 
-    # for debug run
-    if cfg.training.debug:
-        train_df = train_df[:10]
-        valid_df = valid_df[:10]
-
     train_augs_conf = OmegaConf.to_container(cfg.dataset.augmentation.train, resolve=True)
     train_augs_list = [load_obj(i["class_name"])(**i["params"]) for i in train_augs_conf]
     train_augs = A.Compose(train_augs_list)
