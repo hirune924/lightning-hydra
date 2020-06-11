@@ -25,6 +25,7 @@ def get_datasets(cfg: DictConfig) -> dict:
         del_df = pd.read_csv(utils.to_absolute_path(cfg.dataset.cleansing))
         for img_id in del_df['image_id']:
             df = df[df['image_id'] != img_id]
+        df = df.reset_index(drop=True)
 
     kf = load_obj(cfg.dataset.split.class_name)(**cfg.dataset.split.params)
 
