@@ -21,8 +21,8 @@ def get_datasets(cfg: DictConfig) -> dict:
     cfg = OmegaConf.create(cfg)
     df = pd.read_csv(utils.to_absolute_path(os.path.join(cfg.dataset.data_dir, "train.csv")))
 
-    if cfg.cleansing is not None:
-        del_df = pd.read_csv(utils.to_absolute_path(cfg.cleansing))
+    if cfg.dataset.cleansing is not None:
+        del_df = pd.read_csv(utils.to_absolute_path(cfg.dataset.cleansing))
         for img_id in del_df['image_id']:
             df = df[df['image_id'] != img_id]
 
