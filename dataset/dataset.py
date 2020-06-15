@@ -56,6 +56,8 @@ def get_datasets(cfg: DictConfig) -> dict:
         window_size=cfg.dataset.window_size,
         layer=cfg.dataset.layer,
         scale_aug=cfg.dataset.scale_aug,
+        aug_mean= cfg.dataset.aug_mean,
+        aug_scale= cfg.dataset.aug_scale,
     )
 
     valid_dataset = PANDADataset(
@@ -70,6 +72,8 @@ def get_datasets(cfg: DictConfig) -> dict:
         window_size=cfg.dataset.window_size,
         layer=cfg.dataset.layer,
         scale_aug=cfg.dataset.scale_aug,
+        aug_mean= cfg.dataset.aug_mean,
+        aug_scale= cfg.dataset.aug_scale,
     )
 
     return {"train": train_dataset, "valid": valid_dataset}
@@ -79,7 +83,7 @@ class PANDADataset(Dataset):
     """PANDA Dataset."""
 
     def __init__(
-        self, dataframe, data_dir, transform=None, load_type="png", train=True, target_type="float", K=16, auto_ws=True, window_size=128, layer=0, scale_aug=True,
+        self, dataframe, data_dir, transform=None, load_type="png", train=True, target_type="float", K=16, auto_ws=True, window_size=128, layer=0, scale_aug=True, aug_mean=2.0, aug_scale=1.0
     ):
         """
         Args:
@@ -97,6 +101,8 @@ class PANDADataset(Dataset):
         self.layer = layer
         self.scale_aug = scale_aug
         self.K = K
+        self.aug_mean = aug_mean
+        self.aug_scale = aug_scale
 
     def __len__(self):
         return len(self.data)
@@ -110,9 +116,9 @@ class PANDADataset(Dataset):
         elif self.load_type == "tiff_tile":
             img_name = utils.to_absolute_path(os.path.join(os.path.join(self.data_dir, "train_images/"), self.data.loc[idx, "image_id"] + "." + "tiff",))
             if self.scale_aug:
-                scale_factor = np.clip(np.random.normal(loc=2.0, scale=1.0, size=1), 0.5, 3.5,) if self.train else 2.0
+                scale_factor = np.clip(np.random.normal(loc=self.aug_mean, scale=self.aug_scale, size=1), 0.5, 2 * self.aug_mean - 0.5,) if self.train else self.aug_mean
             else:
-                scale_factor = 2.0
+                scale_factor = self.aug_mean
             image = load_img(img_name, K=self.K, scaling_factor=scale_factor, layer=self.layer, auto_ws=self.auto_ws, window_size=self.window_size,)
         data_provider = self.data.loc[idx, "data_provider"]
         gleason_score = self.data.loc[idx, "gleason_score"]

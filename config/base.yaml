@@ -26,6 +26,8 @@ dataset:
     window_size: 128
     layer: 0
     scale_aug: true
+    aug_mean: 2.0
+    aug_scale: 1.0
     split:
         class_name: sklearn.model_selection.StratifiedKFold
         params: {}
