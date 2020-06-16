@@ -33,6 +33,7 @@ dataset:
         params: {}
     fold: 0
     cleansing: null
+    drop: null
     augmentation:
         train:
             #- class_name: albumentations.RandomGridShuffle
