@@ -8,6 +8,7 @@ import segmentation_models_pytorch as smp
 import timm
 
 from layer.layer import AdaptiveConcatPool2d, GeM
+from utils.utils import load_pytorch_model
 
 import glob
 from hydra import utils
@@ -84,7 +85,7 @@ def timm_custom(model_name='gluon_seresnext50_32x4d', num_classes=1, pretrained=
     if pretrained is not None :
         model = timm.create_model(model_name=model_name, num_classes=num_classes, pretrained=False)
         ckpt_pth = glob.glob(utils.to_absolute_path(pretrained))
-        model.load_state_dict(torch.load(ckpt_pth[0]))
+        model = load_pytorch_model(ckpt_pth[0], model)
     else:
         model = timm.create_model(model_name=model_name, num_classes=num_classes, pretrained=True)
 
