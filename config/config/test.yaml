@@ -1,0 +1,31 @@
+dataset: 
+    fold: 1
+    target_type: float # long
+    image_size: 512
+    load_type: png
+    layer: 1
+    split:
+        params: {n_splits: 10, shuffle: true, random_state: 2020}
+
+trainer:
+    distributed_backend: dp
+    precision: 16
+    num_sanity_val_steps: 5
+
+model:
+    class_name: model.model.timm_custom
+    params: {model_name: gluon_seresnext50_32x4d, num_classes: 1, pretrained: null, pool_size: 16}
+
+training:
+    loss:
+        class_name: losses.loss.RMSELoss
+    y2pred: round
+    scheduler:
+        class_name: scheduler.scheduler.CyclicLR
+        params: {base_lr: 5e-6, max_lr: 1e-4, mode: exp_range, gamma: 0.99997, cycle_momentum: false} 
+        interval: step
+    optimizer:
+        class_name: torch.optim.Adam
+        params: {lr: 1e-4}
+    batch_size: 2
+

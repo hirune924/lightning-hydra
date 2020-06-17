@@ -5,6 +5,7 @@ import torch.nn as nn
 import torchvision.models as models
 import pretrainedmodels
 import segmentation_models_pytorch as smp
+import timm
 
 from layer.layer import AdaptiveConcatPool2d, GeM
 
@@ -77,4 +78,17 @@ def se_net(
     elif pool == "gem":
         model.last_linear = nn.Linear(in_features, num_classes)
         model.avg_pool = GeM()
+    return model
+
+def timm_custom(model_name='gluon_seresnext50_32x4d', num_classes=1, pretrained=None, pool_size=1):
+    if pretrained is not None :
+        model = timm.create_model(model_name=model_name, num_classes=num_classes, pretrained=False)
+        model.load_state_dict(torch.load(ckpt_pth[0]))
+    else:
+        model = timm.create_model(model_name=model_name, num_classes=num_classes, pretrained=True)
+
+
+    model.global_pool = nn.AdaptiveAvgPool2d(pool_size)
+    in_features = model.fc.in_features
+    model.fc = nn.Linear(in_features*pool_size*pool_size, num_classes)
     return model
