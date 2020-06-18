@@ -14,7 +14,7 @@ trainer:
 
 model:
     class_name: model.model.timm_custom
-    params: {model_name: gluon_seresnext50_32x4d, num_classes: 1, pretrained: null, pool_size: 16}
+    params: {model_name: gluon_seresnext50_32x4d, num_classes: 1, pretrained: null, pool_size: 16, pool_type: avgdrop, head_type: custom}
 
 training:
     loss:
