@@ -3,9 +3,6 @@ from utils.utils import load_obj
 import torch
 import torch.nn as nn
 import torchvision.models as models
-import pretrainedmodels
-import segmentation_models_pytorch as smp
-import timm
 
 from layer.layer import AdaptiveConcatPool2d, GeM
 from utils.utils import load_pytorch_model
@@ -14,6 +11,24 @@ import glob
 from hydra import utils
 
 import ssl
+
+try:
+    import pretrainedmodels
+    _PRETRAINEDMODELS_AVAILABLE = True
+except ImportError:
+    _PRETRAINEDMODELS_AVAILABLE = False
+
+try:
+    import segmentation_models_pytorch as smp
+    _SEGMENTATION_MODELS_PYTORCH_AVAILABLE = True
+except ImportError:
+    _SEGMENTATION_MODELS_PYTORCH_AVAILABLE = False
+
+try:
+    import timm
+    _TIMM_AVAILABLE = True
+except ImportError:
+    _TIMM_AVAILABLE = False
 
 ssl._create_default_https_context = ssl._create_unverified_context
 

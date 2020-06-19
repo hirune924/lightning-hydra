@@ -63,7 +63,10 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
 
     def configure_optimizers(self):
         # REQUIRED
-        optimizer = get_optimizer(self.model.parameters(), self.hparams)
+        if self.hparams["training"]["loss"]["class_name"] == 'losses.loss.AdaptiveLossFunction':
+            optimizer = get_optimizer(list(self.model.parameters())+list(self.criteria.adaptive.parameters()), self.hparams)
+        else:    
+            optimizer = get_optimizer(self.model.parameters(), self.hparams)
 
         scheduler = get_scheduler(optimizer, self.hparams)
         return (

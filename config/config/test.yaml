@@ -18,7 +18,7 @@ model:
 
 training:
     loss:
-        class_name: losses.loss.RMSELoss
+        class_name: losses.loss.AdaptiveLossFunction #losses.loss.RMSELoss
     y2pred: round
     scheduler:
         class_name: scheduler.scheduler.CyclicLR
