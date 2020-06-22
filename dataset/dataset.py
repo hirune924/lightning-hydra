@@ -38,7 +38,7 @@ def get_datasets(cfg: DictConfig) -> dict:
 
     if cfg.dataset.cleansing is not None:
         del_df = pd.read_csv(utils.to_absolute_path(cfg.dataset.cleansing))
-        del_df = del_df[del_df['data_provider'] == 'radboud']
+        del_df = del_df[del_df['data_provider'] == 'radboud'] ## critical change
         train_df = train_df[~train_df['image_id'].isin(del_df['image_id'])]
 
 
