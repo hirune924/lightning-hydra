@@ -20,10 +20,14 @@ dataset:
             params: {ratio: 0.25, unit_size_min: null, unit_size_max: null, holes_number_x: 4, holes_number_y: 4, shift_x: 0, shift_y: 0, random_offset: True, fill_value: 255, mask_fill_value: null, always_apply: false, p: 0.1}
         - class_name: albumentations.Cutout
             params: {num_holes: 4, max_h_size: 200, max_w_size: 200, fill_value: 255, always_apply: false, p: 0.5}
+        - class_name: albumentations.ElasticTransform
+            params: {p: 0.3}
         - class_name: albumentations.GridDistortion
             params: {num_steps: 4, distort_limit: 0.3, interpolation: 1, border_mode: 4, value: null, mask_value: null, always_apply: false, p: 0.5}
         - class_name: albumentations.Flip
             params: {always_apply: false, p: 0.5}
+        - class_name: albumentations.Blur
+            params: {blur_limit: 10, p: 0.3}
         - class_name: albumentations.HueSaturationValue
             params: {hue_shift_limit: 20, sat_shift_limit: 30, val_shift_limit: 20, always_apply: false, p: 0.5}
         - class_name: albumentations.RandomBrightnessContrast
@@ -39,7 +43,7 @@ trainer:
 
 model:
     class_name: timm.create_model
-    params: {model_name: tf_efficientnet_b3, num_classes: 1, pretrained: true}
+    params: {model_name: gluon_seresnext50_32x4d, num_classes: 1, pretrained: true}
 
 training:
     loss:
@@ -47,10 +51,13 @@ training:
     y2pred: round
     scheduler:
         class_name: scheduler.scheduler.CyclicLR
-        params: {base_lr: 5e-6, max_lr: 1e-4, mode: exp_range, gamma: 0.99997, cycle_momentum: false} 
+        params: {base_lr: 5e-6, max_lr: 1e-4, mode: exp_range, gamma: 0.99999, cycle_momentum: false} 
         interval: step
     optimizer:
         class_name: torch.optim.Adam
         params: {lr: 1e-4}
     batch_size: 8
 
+callbacks:
+    model_checkpoint:
+        save_top_k: 40
