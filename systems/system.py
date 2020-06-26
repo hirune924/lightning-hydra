@@ -50,6 +50,10 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
         # REQUIRED
         x, y, _, _ = batch
         y_hat = self.forward(x)
+        if self.hparams["training"]["label_mode"] == 'reverse':
+            y = 5 - y
+        elif self.hparams["training"]["label_mode"] == 'slide':
+            y = y - 2.5
         loss = self.criteria(y_hat, y)
         loss = loss.unsqueeze(dim=-1)
         log = {"train_loss": loss}
@@ -86,9 +90,16 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
         x, y, data_provider, gleason_score = batch
         y_hat = self.forward(x)
         # val_loss = self.criteria(y_hat, y.view(-1, 1))
+        if self.hparams["training"]["label_mode"] == 'reverse':
+            y = 5 - y
+        elif self.hparams["training"]["label_mode"] == 'slide':
+            y = y - 2.5
         val_loss = self.criteria(y_hat, y)
         val_loss = val_loss.unsqueeze(dim=-1)
-
+        if self.hparams["training"]["label_mode"] == 'reverse':
+            y_hat = 5 - y_hat
+        elif self.hparams["training"]["label_mode"] == 'slide':
+            y_hat = y_hat + 2.5
         return {
             "val_loss": val_loss,
             "y": y,

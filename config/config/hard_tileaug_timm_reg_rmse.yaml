@@ -57,6 +57,7 @@ training:
         class_name: torch.optim.Adam
         params: {lr: 1e-4}
     batch_size: 8
+    label_mode: none
 
 callbacks:
     model_checkpoint:
