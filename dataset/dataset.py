@@ -142,7 +142,7 @@ class PANDADataset(Dataset):
         gleason_score = self.data.loc[idx, "gleason_score"]
         isup_grade = self.data.loc[idx, "isup_grade"]
 
-        if hard_aug is None:
+        if self.hard_aug is None:
             if self.transform:
                 image = self.transform(image=image)
                 image = torch.from_numpy(image["image"].transpose(2, 0, 1))
