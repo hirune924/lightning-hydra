@@ -53,6 +53,12 @@ def get_datasets(cfg: DictConfig) -> dict:
     valid_augs_list = [load_obj(i["class_name"])(**i["params"]) for i in cfg.dataset.augmentation.valid]
     valid_augs = A.Compose(valid_augs_list)
 
+    hard_aug = None
+    if cfg.dataset.hard_aug is not None:
+        hard_aug_conf = OmegaConf.to_container(cfg.dataset.hard_aug, resolve=True)
+        hard_aug_list = [load_obj(i["class_name"])(**i["params"]) for i in hard_aug_conf]
+        hard_aug = A.Compose(hard_aug_list)
+
     train_dataset = PANDADataset(
         train_df,
         cfg.dataset.data_dir,
@@ -67,6 +73,7 @@ def get_datasets(cfg: DictConfig) -> dict:
         scale_aug=cfg.dataset.scale_aug,
         aug_mean= cfg.dataset.aug_mean,
         aug_scale= cfg.dataset.aug_scale,
+        hard_aug=hard_aug,
     )
 
     valid_dataset = PANDADataset(
@@ -83,6 +90,7 @@ def get_datasets(cfg: DictConfig) -> dict:
         scale_aug=cfg.dataset.scale_aug,
         aug_mean= cfg.dataset.aug_mean,
         aug_scale= cfg.dataset.aug_scale,
+        hard_aug=hard_aug,
     )
 
     return {"train": train_dataset, "valid": valid_dataset}
@@ -92,7 +100,7 @@ class PANDADataset(Dataset):
     """PANDA Dataset."""
 
     def __init__(
-        self, dataframe, data_dir, transform=None, load_type="png", train=True, target_type="float", K=16, auto_ws=True, window_size=128, layer=0, scale_aug=True, aug_mean=2.0, aug_scale=1.0
+        self, dataframe, data_dir, transform=None, load_type="png", train=True, target_type="float", K=16, auto_ws=True, window_size=128, layer=0, scale_aug=True, aug_mean=2.0, aug_scale=1.0, hard_aug=None
     ):
         """
         Args:
@@ -112,6 +120,7 @@ class PANDADataset(Dataset):
         self.K = K
         self.aug_mean = aug_mean
         self.aug_scale = aug_scale
+        self.hard_aug = hard_aug
 
     def __len__(self):
         return len(self.data)
@@ -133,9 +142,17 @@ class PANDADataset(Dataset):
         gleason_score = self.data.loc[idx, "gleason_score"]
         isup_grade = self.data.loc[idx, "isup_grade"]
 
-        if self.transform:
-            image = self.transform(image=image)
-            image = torch.from_numpy(image["image"].transpose(2, 0, 1))
+        if hard_aug is None:
+            if self.transform:
+                image = self.transform(image=image)
+                image = torch.from_numpy(image["image"].transpose(2, 0, 1))
+        else:
+            if isup_grade in [4, 5]:
+                image = self.hard_aug(image=image)
+                image = torch.from_numpy(image["image"].transpose(2, 0, 1))
+            else:
+                image = self.transform(image=image)
+                image = torch.from_numpy(image["image"].transpose(2, 0, 1))                           
 
         if self.target_type == "float":
             isup_grade = torch.Tensor([isup_grade]).float()

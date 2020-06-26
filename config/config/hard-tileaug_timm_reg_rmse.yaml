@@ -1,0 +1,56 @@
+hydra:
+    run:
+        dir: /kqi/output/fold_${dataset.fold}
+
+dataset: 
+    data_dir: /kqi/parent
+    fold: 1
+    target_type: float # long
+    image_size: 2048
+    load_type: tiff_tile
+    layer: 1
+    split:
+        params: {n_splits: 10, shuffle: true, random_state: 2020}
+    hard_aug:
+        - class_name: albumentations.Resize
+            params: {height: '${dataset.image_size}', width: '${dataset.image_size}', interpolation: 1, always_apply: true, p: 1.0}
+        - class_name: albumentations.RandomGridShuffle
+            params: {grid: [4, 4], always_apply: true, p: 1.0}
+        - class_name: albumentations.GridDropout
+            params: {ratio: 0.25, unit_size_min: null, unit_size_max: null, holes_number_x: 4, holes_number_y: 4, shift_x: 0, shift_y: 0, random_offset: True, fill_value: 255, mask_fill_value: null, always_apply: false, p: 0.1}
+        - class_name: albumentations.Cutout
+            params: {num_holes: 4, max_h_size: 200, max_w_size: 200, fill_value: 255, always_apply: false, p: 0.5}
+        - class_name: albumentations.GridDistortion
+            params: {num_steps: 4, distort_limit: 0.3, interpolation: 1, border_mode: 4, value: null, mask_value: null, always_apply: false, p: 0.5}
+        - class_name: albumentations.Flip
+            params: {always_apply: false, p: 0.5}
+        - class_name: albumentations.HueSaturationValue
+            params: {hue_shift_limit: 20, sat_shift_limit: 30, val_shift_limit: 20, always_apply: false, p: 0.5}
+        - class_name: albumentations.RandomBrightnessContrast
+            params: {brightness_limit: 0.2, contrast_limit: 0.2, brightness_by_max: true, always_apply: false, p: 0.5}
+        - class_name: albumentations.Normalize
+            params: {mean: [0.485, 0.456, 0.406], std: [0.229, 0.224, 0.225], max_pixel_value: 255.0, always_apply: false, p: 1.0}
+
+
+trainer:
+    distributed_backend: dp
+    precision: 16
+    num_sanity_val_steps: 5
+
+model:
+    class_name: timm.create_model
+    params: {model_name: tf_efficientnet_b3, num_classes: 1, pretrained: true}
+
+training:
+    loss:
+        class_name: losses.loss.RMSELoss
+    y2pred: round
+    scheduler:
+        class_name: scheduler.scheduler.CyclicLR
+        params: {base_lr: 5e-6, max_lr: 1e-4, mode: exp_range, gamma: 0.99997, cycle_momentum: false} 
+        interval: step
+    optimizer:
+        class_name: torch.optim.Adam
+        params: {lr: 1e-4}
+    batch_size: 8
+
