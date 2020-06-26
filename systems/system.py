@@ -98,8 +98,10 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
         val_loss = val_loss.unsqueeze(dim=-1)
         if self.hparams["training"]["label_mode"] == 'reverse':
             y_hat = 5 - y_hat
+            y = 5 - y
         elif self.hparams["training"]["label_mode"] == 'slide':
             y_hat = y_hat + 2.5
+            y = y + 2.5
         return {
             "val_loss": val_loss,
             "y": y,
