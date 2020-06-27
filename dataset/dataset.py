@@ -74,6 +74,7 @@ def get_datasets(cfg: DictConfig) -> dict:
         aug_mean= cfg.dataset.aug_mean,
         aug_scale= cfg.dataset.aug_scale,
         hard_aug=hard_aug,
+        mixtile=cfg.dataset.mixtile
     )
 
     valid_dataset = PANDADataset(
@@ -90,7 +91,7 @@ def get_datasets(cfg: DictConfig) -> dict:
         scale_aug=cfg.dataset.scale_aug,
         aug_mean= cfg.dataset.aug_mean,
         aug_scale= cfg.dataset.aug_scale,
-        hard_aug=hard_aug,
+        hard_aug=None,
     )
 
     return {"train": train_dataset, "valid": valid_dataset}
@@ -100,7 +101,7 @@ class PANDADataset(Dataset):
     """PANDA Dataset."""
 
     def __init__(
-        self, dataframe, data_dir, transform=None, load_type="png", train=True, target_type="float", K=16, auto_ws=True, window_size=128, layer=0, scale_aug=True, aug_mean=2.0, aug_scale=1.0, hard_aug=None
+        self, dataframe, data_dir, transform=None, load_type="png", train=True, target_type="float", K=16, auto_ws=True, window_size=128, layer=0, scale_aug=True, aug_mean=2.0, aug_scale=1.0, hard_aug=None, mixtile=None,
     ):
         """
         Args:
@@ -121,6 +122,20 @@ class PANDADataset(Dataset):
         self.aug_mean = aug_mean
         self.aug_scale = aug_scale
         self.hard_aug = hard_aug
+
+        self.mixtile = mixtile
+        if self.mixtile is not None:
+            self.radboud_cache = {'0+0': torch.zeros(3, hparams.dataset.image_size, hparams.dataset.image_size),
+             '3+3': torch.zeros(3, hparams.dataset.image_size, hparams.dataset.image_size),
+             '4+4': torch.zeros(3, hparams.dataset.image_size, hparams.dataset.image_size),
+             '5+5': torch.zeros(3, hparams.dataset.image_size, hparams.dataset.image_size)}
+            self.karolinska_cache = {'0+0': torch.zeros(3, hparams.dataset.image_size, hparams.dataset.image_size),
+             '3+3': torch.zeros(3, hparams.dataset.image_size, hparams.dataset.image_size),
+             '4+4': torch.zeros(3, hparams.dataset.image_size, hparams.dataset.image_size),
+             '5+5': torch.zeros(3, hparams.dataset.image_size, hparams.dataset.image_size)}
+            self.work = torch.zeros(3, hparams.dataset.image_size, hparams.dataset.image_size)
+
+
 
     def __len__(self):
         return len(self.data)
