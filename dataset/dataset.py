@@ -125,15 +125,16 @@ class PANDADataset(Dataset):
 
         self.mixtile = mixtile
         if self.mixtile is not None:
-            self.radboud_cache = {'0+0': torch.zeros(3, hparams.dataset.image_size, hparams.dataset.image_size),
-             '3+3': torch.zeros(3, hparams.dataset.image_size, hparams.dataset.image_size),
-             '4+4': torch.zeros(3, hparams.dataset.image_size, hparams.dataset.image_size),
-             '5+5': torch.zeros(3, hparams.dataset.image_size, hparams.dataset.image_size)}
-            self.karolinska_cache = {'0+0': torch.zeros(3, hparams.dataset.image_size, hparams.dataset.image_size),
-             '3+3': torch.zeros(3, hparams.dataset.image_size, hparams.dataset.image_size),
-             '4+4': torch.zeros(3, hparams.dataset.image_size, hparams.dataset.image_size),
-             '5+5': torch.zeros(3, hparams.dataset.image_size, hparams.dataset.image_size)}
-            self.work = torch.zeros(3, hparams.dataset.image_size, hparams.dataset.image_size)
+            self.radboud_cache = {0: np.full((hparams.dataset.image_size, hparams.dataset.image_size, 3), 255, dtype=np.uint8),
+             3: np.full((hparams.dataset.image_size, hparams.dataset.image_size, 3), 255, dtype=np.uint8),
+             4: np.full((hparams.dataset.image_size, hparams.dataset.image_size, 3), 255, dtype=np.uint8),
+             5: np.full((hparams.dataset.image_size, hparams.dataset.image_size, 3), 255, dtype=np.uint8)}
+            self.karolinska_cache = {0: np.full((hparams.dataset.image_size, hparams.dataset.image_size, 3), 255, dtype=np.uint8),
+             3: np.full((hparams.dataset.image_size, hparams.dataset.image_size, 3), 255, dtype=np.uint8),
+             4: np.full((hparams.dataset.image_size, hparams.dataset.image_size, 3), 255, dtype=np.uint8),
+             5: np.full((hparams.dataset.image_size, hparams.dataset.image_size, 3), 255, dtype=np.uint8)}
+            self.work = np.full((hparams.dataset.image_size, hparams.dataset.image_size, 3), 255, dtype=np.uint8)
+            self.gl_dict = {"negative": 0, "0+0": 0, "3+3": 3, "4+4": 4, "5+5": 5}
 
 
 
@@ -156,6 +157,30 @@ class PANDADataset(Dataset):
         data_provider = self.data.loc[idx, "data_provider"]
         gleason_score = self.data.loc[idx, "gleason_score"]
         isup_grade = self.data.loc[idx, "isup_grade"]
+
+        if self.mixtile is not None:
+            if gleason_score in ["negative", "0+0", "3+3", "4+4", "5+5"]:
+                p = np.random.rand()
+                if p > 0.5:
+                    n_tile = np.random.randint(1,5)
+                    target_tile = np.random.choice(np.arange(16), size=n_tile, replace=False)
+                    target_gleason = np.random.choice([3,4,5]) if gleason_score not in ["negative", "0+0"] else 0
+                    self.work = image
+                    for region in target_tile:
+                        x = region // 4
+                        y = region % 4
+                        if data_provider == 'radboud':
+                            self.work[x * 512: (x + 1) * 512, y * 512: (y + 1) * 512, :] = self.radboud_cache[target_gleason][x * 512: (x + 1) * 512, y * 512: (y + 1) * 512, :]
+                        elif data_provider == 'karolinska':
+                            self.work[x * 512: (x + 1) * 512, y * 512: (y + 1) * 512, :] = self.karolinska_cache[target_gleason][x * 512: (x + 1) * 512, y * 512: (y + 1) * 512, :]
+                    if data_provider == 'radboud':
+                        self.radboud_cache[self.gl_dict[gleason_score]] = image
+                    elif data_provider == 'karolinska':
+                        self.karolinska_cache[self.gl_dict[gleason_score]] = image
+                    image = self.work
+                    isup_grade = gleason2isup('{}+{}'.format(self.gl_dict[gleason_score], target_gleason))
+
+
 
         if self.hard_aug is None:
             if self.transform:
@@ -201,3 +226,20 @@ def gleason2id(gleason):
         "5+3": 10,
     }
     return trans_dict[gleason]
+
+def gleason2isup(gleason):
+    if gleason in [ '0+0', 'negative' ]:
+        return 0
+    elif gleason == '3+3':
+        return 1
+    elif gleason == '3+4':
+        return 2
+    elif gleason == '4+3':
+        return 3
+    elif gleason in [ '4+4', '3+5', '5+3' ]:
+        return 4
+    elif gleason in [ '4+5', '5+4', '5+5' ]:
+        return 5
+    else:
+        pass
+    return 0
