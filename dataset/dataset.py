@@ -125,15 +125,15 @@ class PANDADataset(Dataset):
 
         self.mixtile = mixtile
         if self.mixtile is not None:
-            self.radboud_cache = {0: np.full((hparams.dataset.image_size, hparams.dataset.image_size, 3), 255, dtype=np.uint8),
-             3: np.full((hparams.dataset.image_size, hparams.dataset.image_size, 3), 255, dtype=np.uint8),
-             4: np.full((hparams.dataset.image_size, hparams.dataset.image_size, 3), 255, dtype=np.uint8),
-             5: np.full((hparams.dataset.image_size, hparams.dataset.image_size, 3), 255, dtype=np.uint8)}
-            self.karolinska_cache = {0: np.full((hparams.dataset.image_size, hparams.dataset.image_size, 3), 255, dtype=np.uint8),
-             3: np.full((hparams.dataset.image_size, hparams.dataset.image_size, 3), 255, dtype=np.uint8),
-             4: np.full((hparams.dataset.image_size, hparams.dataset.image_size, 3), 255, dtype=np.uint8),
-             5: np.full((hparams.dataset.image_size, hparams.dataset.image_size, 3), 255, dtype=np.uint8)}
-            self.work = np.full((hparams.dataset.image_size, hparams.dataset.image_size, 3), 255, dtype=np.uint8)
+            self.radboud_cache = {0: np.full((2048, 2048, 3), 255, dtype=np.uint8),
+             3: np.full((2048, 2048, 3), 255, dtype=np.uint8),
+             4: np.full((2048, 2048, 3), 255, dtype=np.uint8),
+             5: np.full((2048, 2048, 3), 255, dtype=np.uint8)}
+            self.karolinska_cache = {0: np.full((2048, 2048, 3), 255, dtype=np.uint8),
+             3: np.full((2048, 2048, 3), 255, dtype=np.uint8),
+             4: np.full((2048, 2048, 3), 255, dtype=np.uint8),
+             5: np.full((2048, 2048, 3), 255, dtype=np.uint8)}
+            self.work = np.full((2048, 2048, 3), 255, dtype=np.uint8)
             self.gl_dict = {"negative": 0, "0+0": 0, "3+3": 3, "4+4": 4, "5+5": 5}
 
 
