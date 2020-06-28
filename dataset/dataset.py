@@ -165,7 +165,8 @@ class PANDADataset(Dataset):
                     n_tile = np.random.randint(1,5)
                     target_tile = np.random.choice(np.arange(16), size=n_tile, replace=False)
                     target_gleason = np.random.choice([3,4,5]) if gleason_score not in ["negative", "0+0"] else 0
-                    self.work = image
+                    image = cv2.resize(image, (2048, 2048, 3))
+                    self.work = image.copy()
                     for region in target_tile:
                         x = region // 4
                         y = region % 4
@@ -174,10 +175,10 @@ class PANDADataset(Dataset):
                         elif data_provider == 'karolinska':
                             self.work[x * 512: (x + 1) * 512, y * 512: (y + 1) * 512, :] = self.karolinska_cache[target_gleason][x * 512: (x + 1) * 512, y * 512: (y + 1) * 512, :]
                     if data_provider == 'radboud':
-                        self.radboud_cache[self.gl_dict[gleason_score]] = image
+                        self.radboud_cache[self.gl_dict[gleason_score]] = image.copy()
                     elif data_provider == 'karolinska':
-                        self.karolinska_cache[self.gl_dict[gleason_score]] = image
-                    image = self.work
+                        self.karolinska_cache[self.gl_dict[gleason_score]] = image.copy()
+                    image = self.work.copy()
                     isup_grade = gleason2isup('{}+{}'.format(self.gl_dict[gleason_score], target_gleason))
 
 
