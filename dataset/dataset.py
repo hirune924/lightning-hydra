@@ -165,7 +165,7 @@ class PANDADataset(Dataset):
                     n_tile = np.random.randint(1,5)
                     target_tile = np.random.choice(np.arange(16), size=n_tile, replace=False)
                     target_gleason = np.random.choice([3,4,5]) if gleason_score not in ["negative", "0+0"] else 0
-                    image = cv2.resize(image, (2048, 2048, 3))
+                    image = cv2.resize(image, (2048, 2048))
                     self.work = image.copy()
                     for region in target_tile:
                         x = region // 4
