@@ -16,6 +16,8 @@ from pytorch_lightning.callbacks import LearningRateLogger
 from logger.logger import CustomNeptuneLogger
 from pytorch_lightning import loggers
 
+import torch.nn as nn
+
 
 # @hydra.main(config_path="config", strict=False)
 @hydra.main(config_path="config/config.yaml", strict=False)
@@ -32,6 +34,8 @@ def main(cfg: DictConfig) -> None:
     if cfg.model.ckpt_path is not None:
         ckpt_pth = glob.glob(utils.to_absolute_path(cfg.model.ckpt_path))
         model = load_pytorch_model(ckpt_pth[0], model)
+    if cfg.trainer.distributed_backend == 'ddp':
+        model = nn.SyncBatchNorm.convert_sync_batchnorm(model)
 
     seed_everything(2020)
 
