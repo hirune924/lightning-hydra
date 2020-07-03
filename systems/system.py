@@ -133,6 +133,11 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
         sample_idx = (gleason_score != 0) & (gleason_score != 1) & (gleason_score != 2)
         sample_qwk = metrics.cohen_kappa_score(y[sample_idx], preds[sample_idx], weights="quadratic", labels=range(self.num_classes),)
 
+        public_sim_qwk_idx = ((data_provider == 0) & (y > 2.5)) | ((data_provider == 1) & (y < 2.5))
+        private_sim_qwk_idx = ((data_provider == 1) & (y > 2.5)) | ((data_provider == 0) & (y < 2.5))
+        public_sim_qwk = metrics.cohen_kappa_score(y[public_sim_qwk_idx], preds[public_sim_qwk_idx], weights="quadratic", labels=range(self.num_classes),)
+        private_sim_qwk = metrics.cohen_kappa_score(y[private_sim_qwk_idx], preds[private_sim_qwk_idx], weights="quadratic", labels=range(self.num_classes),)
+
         log = {
             "avg_val_loss": avg_loss,
             "val_acc": val_acc,
@@ -142,6 +147,8 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
             "sample_qwk": sample_qwk,
             "val_qwk_o": qwk_o,
             "val_qwk_e": qwk_e,
+            "public_sim_qwk": public_sim_qwk
+            "private_sim_qwk": private_sim_qwk
         }
 
         return {"avg_val_loss": avg_loss, "log": log}
