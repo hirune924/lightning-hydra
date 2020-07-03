@@ -135,6 +135,8 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
 
         public_sim_qwk_idx = ((data_provider == 0) & (y > 2.5)) | ((data_provider == 1) & (y < 2.5))
         private_sim_qwk_idx = ((data_provider == 1) & (y > 2.5)) | ((data_provider == 0) & (y < 2.5))
+        print(y)
+        print(data_provider)
         print(public_sim_qwk_idx)
         print(((data_provider == 0) & (y > 2.5)))
         public_sim_qwk = metrics.cohen_kappa_score(y[public_sim_qwk_idx], preds[public_sim_qwk_idx], weights="quadratic", labels=range(self.num_classes),)
