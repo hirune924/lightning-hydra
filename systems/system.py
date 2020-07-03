@@ -147,7 +147,7 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
             "sample_qwk": sample_qwk,
             "val_qwk_o": qwk_o,
             "val_qwk_e": qwk_e,
-            "public_sim_qwk": public_sim_qwk
+            "public_sim_qwk": public_sim_qwk,
             "private_sim_qwk": private_sim_qwk
         }
 
