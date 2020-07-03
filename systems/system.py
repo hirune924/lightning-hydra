@@ -133,12 +133,12 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
         sample_idx = (gleason_score != 0) & (gleason_score != 1) & (gleason_score != 2)
         sample_qwk = metrics.cohen_kappa_score(y[sample_idx], preds[sample_idx], weights="quadratic", labels=range(self.num_classes),)
 
-        public_sim_qwk_idx = ((data_provider == 0) & (y > 2.5)) | ((data_provider == 1) & (y < 2.5))
-        private_sim_qwk_idx = ((data_provider == 1) & (y > 2.5)) | ((data_provider == 0) & (y < 2.5))
-        print(y)
-        print(data_provider)
-        print(public_sim_qwk_idx)
-        print(((data_provider == 0) & (y > 2.5)))
+        public_sim_qwk_idx = ((data_provider == 0) & (y.flatten() > 2.5)) | ((data_provider == 1) & (y.flatten() < 2.5))
+        private_sim_qwk_idx = ((data_provider == 1) & (y.flatten() > 2.5)) | ((data_provider == 0) & (y.flatten() < 2.5))
+        #print(y)
+        #print(data_provider)
+        #print(public_sim_qwk_idx)
+        #print(((data_provider == 0) & (y > 2.5)))
         public_sim_qwk = metrics.cohen_kappa_score(y[public_sim_qwk_idx], preds[public_sim_qwk_idx], weights="quadratic", labels=range(self.num_classes),)
         private_sim_qwk = metrics.cohen_kappa_score(y[private_sim_qwk_idx], preds[private_sim_qwk_idx], weights="quadratic", labels=range(self.num_classes),)
 
