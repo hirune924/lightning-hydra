@@ -98,7 +98,7 @@ def se_net(
 
 def timm_custom(model_name='gluon_seresnext50_32x4d', num_classes=1, pretrained=None, pool_size=1, pool_type='avg', head_type='linear'):
     if pretrained is not None :
-        model = timm.create_model(model_name=model_name, num_classes=num_classes, pretrained=False)
+        model = timm.create_model(model_name=model_name, num_classes=1000, pretrained=False)
         ckpt_pth = glob.glob(utils.to_absolute_path(pretrained))
         #model = load_pytorch_model(ckpt_pth[0], model)
         model = model.load_state_dict(torch.load(ckpt_pth[0]))
