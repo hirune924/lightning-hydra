@@ -190,9 +190,9 @@ KNOWN_MODELS = OrderedDict([
 ])
 
 def get_weights(bit_variant):
-      response = requests.get(f'https://storage.googleapis.com/bit_models/{bit_variant}.npz')
-  response.raise_for_status()
-  return np.load(io.BytesIO(response.content))
+    response = requests.get(f'https://storage.googleapis.com/bit_models/{bit_variant}.npz')
+    response.raise_for_status()
+    return np.load(io.BytesIO(response.content))
 
 
 def create_model(model_name=None, num_classes=None, pretrained=None):
@@ -200,3 +200,5 @@ def create_model(model_name=None, num_classes=None, pretrained=None):
     if pretrained:
         weights = get_weights(model_name)
         model.load_from(weights)
+        
+    return model
