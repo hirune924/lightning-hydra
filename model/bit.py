@@ -23,6 +23,7 @@ import torch.nn.functional as F
 
 import requests
 import io
+import numpy as np
 
 class StdConv2d(nn.Conv2d):
 
@@ -200,5 +201,5 @@ def create_model(model_name=None, num_classes=None, pretrained=None):
     if pretrained:
         weights = get_weights(model_name)
         model.load_from(weights)
-        
+
     return model
