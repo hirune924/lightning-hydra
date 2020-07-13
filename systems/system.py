@@ -128,31 +128,27 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
         val_acc = metrics.accuracy_score(y, preds)
 
         val_qwk, qwk_o, qwk_e = monitored_cohen_kappa_score(y, preds, weights="quadratic", verbose=True)
-        karolinska_qwk = metrics.cohen_kappa_score(y[data_provider == 0], preds[data_provider == 0], weights="quadratic", labels=range(self.num_classes),)
-        radboud_qwk = metrics.cohen_kappa_score(y[data_provider == 1], preds[data_provider == 1], weights="quadratic", labels=range(self.num_classes),)
-        sample_idx = (gleason_score != 0) & (gleason_score != 1) & (gleason_score != 2)
-        sample_qwk = metrics.cohen_kappa_score(y[sample_idx], preds[sample_idx], weights="quadratic", labels=range(self.num_classes),)
+        #karolinska_qwk = metrics.cohen_kappa_score(y[data_provider == 0], preds[data_provider == 0], weights="quadratic", labels=range(self.num_classes),)
+        #radboud_qwk = metrics.cohen_kappa_score(y[data_provider == 1], preds[data_provider == 1], weights="quadratic", labels=range(self.num_classes),)
+        #sample_idx = (gleason_score != 0) & (gleason_score != 1) & (gleason_score != 2)
+        #sample_qwk = metrics.cohen_kappa_score(y[sample_idx], preds[sample_idx], weights="quadratic", labels=range(self.num_classes),)
 
-        public_sim_qwk_idx = ((data_provider == 0) & (y.flatten() > 2.5)) | ((data_provider == 1) & (y.flatten() < 2.5))
-        private_sim_qwk_idx = ((data_provider == 1) & (y.flatten() > 2.5)) | ((data_provider == 0) & (y.flatten() < 2.5))
-        #print(y)
-        #print(data_provider)
-        #print(public_sim_qwk_idx)
-        #print(((data_provider == 0) & (y > 2.5)))
-        public_sim_qwk = metrics.cohen_kappa_score(y[public_sim_qwk_idx], preds[public_sim_qwk_idx], weights="quadratic", labels=range(self.num_classes),)
-        private_sim_qwk = metrics.cohen_kappa_score(y[private_sim_qwk_idx], preds[private_sim_qwk_idx], weights="quadratic", labels=range(self.num_classes),)
+        #public_sim_qwk_idx = ((data_provider == 0) & (y.flatten() > 2.5)) | ((data_provider == 1) & (y.flatten() < 2.5))
+        #private_sim_qwk_idx = ((data_provider == 1) & (y.flatten() > 2.5)) | ((data_provider == 0) & (y.flatten() < 2.5))
+        #public_sim_qwk = metrics.cohen_kappa_score(y[public_sim_qwk_idx], preds[public_sim_qwk_idx], weights="quadratic", labels=range(self.num_classes),)
+        #private_sim_qwk = metrics.cohen_kappa_score(y[private_sim_qwk_idx], preds[private_sim_qwk_idx], weights="quadratic", labels=range(self.num_classes),)
 
         log = {
             "avg_val_loss": avg_loss,
             "val_acc": val_acc,
             "val_qwk": val_qwk,
-            "karolinska_qwk": karolinska_qwk,
-            "radboud_qwk": radboud_qwk,
-            "sample_qwk": sample_qwk,
+            #"karolinska_qwk": karolinska_qwk,
+            #"radboud_qwk": radboud_qwk,
+            #"sample_qwk": sample_qwk,
             "val_qwk_o": qwk_o,
             "val_qwk_e": qwk_e,
-            "public_sim_qwk": public_sim_qwk,
-            "private_sim_qwk": private_sim_qwk
+            #"public_sim_qwk": public_sim_qwk,
+            #"private_sim_qwk": private_sim_qwk
         }
 
         return {"avg_val_loss": avg_loss, "log": log}
