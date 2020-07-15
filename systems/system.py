@@ -50,7 +50,7 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
     # For Training
     def training_step(self, batch, batch_nb):
         # REQUIRED
-        x, y, _, _ = batch
+        x, y, _, _, _ = batch
         y_hat = self.forward(x)
 
         loss = self.criteria(y_hat, y)
@@ -86,7 +86,7 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
     # For Validation
     def validation_step(self, batch, batch_nb):
         # OPTIONAL
-        x, y, data_provider, gleason_score = batch
+        x, y, isup_grade, data_provider, gleason_score = batch
         y_hat = self.forward(x)
 
         val_loss = self.criteria(y_hat, y)
