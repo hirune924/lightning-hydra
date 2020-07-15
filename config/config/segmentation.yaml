@@ -1,0 +1,41 @@
+hydra:
+    run:
+        dir: /kqi/output/fold_${dataset.fold}
+
+dataset: 
+    data_dir: /kqi/parent
+    fold: 1
+    target_type: float # long
+    image_size: 2048
+    load_type: tiff_tile
+    layer: 1
+    split:
+        params: {n_splits: 10, shuffle: true, random_state: 2020}
+
+
+trainer:
+    distributed_backend: dp
+    precision: 16
+    num_sanity_val_steps: 5
+
+model:
+    class_name: segmentation_models_pytorch.Unet
+    params: {encoder_name: 'resnet34', in_channels: 3, classes: 6, activation: 'sigmoid', encoder_weights: 'imagenet'}
+
+training:
+    loss:
+        class_name: segmentation_models_pytorch.utils.losses.DiceLoss
+    y2pred: round
+    scheduler:
+        class_name: scheduler.scheduler.CyclicLR
+        params: {base_lr: 5e-6, max_lr: 1e-4, mode: exp_range, gamma: 0.99999, cycle_momentum: false} 
+        interval: step
+    optimizer:
+        class_name: torch.optim.Adam
+        params: {lr: 1e-4}
+    batch_size: 8
+    label_mode: null
+
+callbacks:
+    model_checkpoint:
+        save_top_k: 20

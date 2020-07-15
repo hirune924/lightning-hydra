@@ -23,6 +23,7 @@ from metrics.metric import (
     lazy_accuracy,
     monitored_cohen_kappa_score,
 )
+import segmentation_models_pytorch as smp
 
 from omegaconf import DictConfig, OmegaConf
 
@@ -41,6 +42,7 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
         self.num_classes = hparams.training.num_classes
         self.criteria = get_loss(hparams)
         self.y2pred = hparams.training.y2pred
+        self.iou = smp.utils.metrics.IoU(threshold=0.5)
 
     def forward(self, x):
         return self.model(x)
@@ -50,10 +52,7 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
         # REQUIRED
         x, y, _, _ = batch
         y_hat = self.forward(x)
-        if self.hparams["training"]["label_mode"] == 'reverse':
-            y = 5 - y
-        elif self.hparams["training"]["label_mode"] == 'slide':
-            y = y - 2.5
+
         loss = self.criteria(y_hat, y)
         loss = loss.unsqueeze(dim=-1)
         log = {"train_loss": loss}
@@ -89,45 +88,39 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
         # OPTIONAL
         x, y, data_provider, gleason_score = batch
         y_hat = self.forward(x)
-        # val_loss = self.criteria(y_hat, y.view(-1, 1))
-        if self.hparams["training"]["label_mode"] == 'reverse':
-            y = 5 - y
-        elif self.hparams["training"]["label_mode"] == 'slide':
-            y = y - 2.5
+
         val_loss = self.criteria(y_hat, y)
         val_loss = val_loss.unsqueeze(dim=-1)
-        if self.hparams["training"]["label_mode"] == 'reverse':
-            y_hat = 5 - y_hat
-            y = 5 - y
-        elif self.hparams["training"]["label_mode"] == 'slide':
-            y_hat = y_hat + 2.5
-            y = y + 2.5
+        val_iou = self.iou(y_hat, y).unsqueeze(dim=-1)
+
         return {
             "val_loss": val_loss,
-            "y": y,
-            "y_hat": y_hat,
-            "data_provider": data_provider,
-            "gleason_score": gleason_score,
+            "val_iou": val_iou
+            #"y": y,
+            #"y_hat": y_hat,
+            #"data_provider": data_provider,
+            #"gleason_score": gleason_score,
         }
 
     def validation_epoch_end(self, outputs):
         # OPTIONAL
         avg_loss = torch.stack([x["val_loss"] for x in outputs]).mean()
+        avg_val_iou = torch.stack([x["val_iou"] for x in outputs]).mean()
 
-        y = torch.cat([x["y"] for x in outputs]).cpu().detach().numpy().copy()
-        y_hat = torch.cat([x["y_hat"] for x in outputs]).cpu().detach().numpy().copy()
+        #y = torch.cat([x["y"] for x in outputs]).cpu().detach().numpy().copy()
+        #y_hat = torch.cat([x["y_hat"] for x in outputs]).cpu().detach().numpy().copy()
 
-        data_provider = torch.cat([x["data_provider"] for x in outputs]).cpu().detach().numpy().copy()
-        gleason_score = torch.cat([x["gleason_score"] for x in outputs]).cpu().detach().numpy().copy()
+        #data_provider = torch.cat([x["data_provider"] for x in outputs]).cpu().detach().numpy().copy()
+        #gleason_score = torch.cat([x["gleason_score"] for x in outputs]).cpu().detach().numpy().copy()
 
-        if self.y2pred == "round":
-            preds = preds_rounder(y_hat, self.num_classes)
-        elif self.y2pred == "argmax":
-            preds = np.argmax(y_hat, axis=1)
+        #if self.y2pred == "round":
+        #    preds = preds_rounder(y_hat, self.num_classes)
+        #elif self.y2pred == "argmax":
+        #    preds = np.argmax(y_hat, axis=1)
 
-        val_acc = metrics.accuracy_score(y, preds)
+        #val_acc = metrics.accuracy_score(y, preds)
 
-        val_qwk, qwk_o, qwk_e = monitored_cohen_kappa_score(y, preds, weights="quadratic", verbose=True)
+        #val_qwk, qwk_o, qwk_e = monitored_cohen_kappa_score(y, preds, weights="quadratic", verbose=True)
         #karolinska_qwk = metrics.cohen_kappa_score(y[data_provider == 0], preds[data_provider == 0], weights="quadratic", labels=range(self.num_classes),)
         #radboud_qwk = metrics.cohen_kappa_score(y[data_provider == 1], preds[data_provider == 1], weights="quadratic", labels=range(self.num_classes),)
         #sample_idx = (gleason_score != 0) & (gleason_score != 1) & (gleason_score != 2)
@@ -140,13 +133,14 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
 
         log = {
             "avg_val_loss": avg_loss,
-            "val_acc": val_acc,
-            "val_qwk": val_qwk,
+            "avg_val_iou": avg_val_iou
+            #"val_acc": val_acc,
+            #"val_qwk": val_qwk,
             #"karolinska_qwk": karolinska_qwk,
             #"radboud_qwk": radboud_qwk,
             #"sample_qwk": sample_qwk,
-            "val_qwk_o": qwk_o,
-            "val_qwk_e": qwk_e,
+            #"val_qwk_o": qwk_o,
+            #"val_qwk_e": qwk_e,
             #"public_sim_qwk": public_sim_qwk,
             #"private_sim_qwk": private_sim_qwk
         }

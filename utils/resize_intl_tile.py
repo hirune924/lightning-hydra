@@ -189,7 +189,7 @@ def glue_to_one_picture(image_patches, window_size=200, k=16):
 
 
 def load_img(
-    img_name, K=16, scaling_factor=1.0, layer=0, auto_ws=True, window_size=128,
+    img_name, K=16, scaling_factor=1.0, layer=0, auto_ws=True, window_size=128, mask_name=None
 ):
     WINDOW_SIZE = window_size
     STRIDE = window_size
@@ -203,7 +203,8 @@ def load_img(
         glued_image = glue_to_one_picture_from_coord(img_name, best_coordinates, window_size=WINDOW_SIZE, k=K, layer=layer,)
     else:
         glued_image = glue_to_one_picture_from_coord_lowlayer(img_name, best_coordinates, window_size=WINDOW_SIZE, k=K, layer=layer,)
-    return glued_image
+        glued_mask = glue_to_one_picture_from_coord_lowlayer(mask_name, best_coordinates, window_size=WINDOW_SIZE, k=K, layer=layer,)
+    return glued_image, glued_mask
 
 
 def main(args):

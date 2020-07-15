@@ -20,7 +20,7 @@ def get_datasets(cfg: DictConfig) -> dict:
 
     cfg = OmegaConf.create(cfg)
     df = pd.read_csv(utils.to_absolute_path(os.path.join(cfg.dataset.data_dir, "train.csv")))
-
+    df = df[df['data_provider']=='radboud']
     #if cfg.dataset.cleansing is not None:
     #    del_df = pd.read_csv(utils.to_absolute_path(cfg.dataset.cleansing))
     #    for img_id in del_df['image_id']:
@@ -29,7 +29,7 @@ def get_datasets(cfg: DictConfig) -> dict:
 
     kf = load_obj(cfg.dataset.split.class_name)(**cfg.dataset.split.params)
 
-    for fold, (train_index, val_index) in enumerate(kf.split(df.values, df["isup_grade"].astype(str) + df["data_provider"],)):
+    for fold, (train_index, val_index) in enumerate(kf.split(df.values, df["isup_grade"].astype(str),)):
         df.loc[val_index, "fold"] = int(fold)
     df["fold"] = df["fold"].astype(int)
 
@@ -123,19 +123,6 @@ class PANDADataset(Dataset):
         self.aug_scale = aug_scale
         self.hard_aug = hard_aug
 
-        self.mixtile = mixtile
-        if self.mixtile is not None:
-            self.radboud_cache = {0: np.full((2048, 2048, 3), 255, dtype=np.uint8),
-             3: np.full((2048, 2048, 3), 255, dtype=np.uint8),
-             4: np.full((2048, 2048, 3), 255, dtype=np.uint8),
-             5: np.full((2048, 2048, 3), 255, dtype=np.uint8)}
-            self.karolinska_cache = {0: np.full((2048, 2048, 3), 255, dtype=np.uint8),
-             3: np.full((2048, 2048, 3), 255, dtype=np.uint8),
-             4: np.full((2048, 2048, 3), 255, dtype=np.uint8),
-             5: np.full((2048, 2048, 3), 255, dtype=np.uint8)}
-            self.work = np.full((2048, 2048, 3), 255, dtype=np.uint8)
-            self.gl_dict = {"negative": 0, "0+0": 0, "3+3": 3, "4+4": 4, "5+5": 5}
-
 
 
     def __len__(self):
@@ -149,51 +136,22 @@ class PANDADataset(Dataset):
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         elif self.load_type == "tiff_tile":
             img_name = utils.to_absolute_path(os.path.join(os.path.join(self.data_dir, "train_images/"), self.data.loc[idx, "image_id"] + "." + "tiff",))
+            mask_name = utils.to_absolute_path(os.path.join(os.path.join(self.data_dir, "train_images/"), self.data.loc[idx, "image_id"] + "_mask." + "tiff",))
             if self.scale_aug:
                 scale_factor = np.clip(np.random.normal(loc=self.aug_mean, scale=self.aug_scale, size=1), 0.5, 2 * self.aug_mean - 0.5,) if self.train else self.aug_mean
             else:
                 scale_factor = self.aug_mean
-            image = load_img(img_name, K=self.K, scaling_factor=scale_factor, layer=self.layer, auto_ws=self.auto_ws, window_size=self.window_size,)
+            image, mask = load_img(img_name, K=self.K, scaling_factor=scale_factor, layer=self.layer, auto_ws=self.auto_ws, window_size=self.window_size, mask_name=mask_name)
         data_provider = self.data.loc[idx, "data_provider"]
         gleason_score = self.data.loc[idx, "gleason_score"]
         isup_grade = self.data.loc[idx, "isup_grade"]
 
-        if self.mixtile is not None:
-            if gleason_score in ["negative", "0+0", "3+3", "4+4", "5+5"]:
-                p = np.random.rand()
-                if p > 0.5:
-                    n_tile = np.random.randint(1,5)
-                    target_tile = np.random.choice(np.arange(16), size=n_tile, replace=False)
-                    target_gleason = np.random.choice([3,4,5]) if gleason_score not in ["negative", "0+0"] else 0
-                    image = cv2.resize(image, (2048, 2048))
-                    self.work = image.copy()
-                    for region in target_tile:
-                        x = region // 4
-                        y = region % 4
-                        if data_provider == 'radboud':
-                            self.work[x * 512: (x + 1) * 512, y * 512: (y + 1) * 512, :] = self.radboud_cache[target_gleason][x * 512: (x + 1) * 512, y * 512: (y + 1) * 512, :]
-                        elif data_provider == 'karolinska':
-                            self.work[x * 512: (x + 1) * 512, y * 512: (y + 1) * 512, :] = self.karolinska_cache[target_gleason][x * 512: (x + 1) * 512, y * 512: (y + 1) * 512, :]
-                    if data_provider == 'radboud':
-                        self.radboud_cache[self.gl_dict[gleason_score]] = image.copy()
-                    elif data_provider == 'karolinska':
-                        self.karolinska_cache[self.gl_dict[gleason_score]] = image.copy()
-                    image = self.work.copy()
-                    isup_grade = gleason2isup('{}+{}'.format(self.gl_dict[gleason_score], target_gleason))
-
-
-
-        if self.hard_aug is None:
-            if self.transform:
-                image = self.transform(image=image)
-                image = torch.from_numpy(image["image"].transpose(2, 0, 1))
-        else:
-            if isup_grade in [4, 5]:
-                image = self.hard_aug(image=image)
-                image = torch.from_numpy(image["image"].transpose(2, 0, 1))
-            else:
-                image = self.transform(image=image)
-                image = torch.from_numpy(image["image"].transpose(2, 0, 1))                           
+        if self.transform:
+            mask = mask[:,:,0]
+            mask[mask == 255] = 0
+            image_aug = self.transform(image=image, mask=mask)
+            image = torch.from_numpy(image_aug["image"].transpose(2, 0, 1))
+            mask = torch.from_numpy(image_aug["mask"])                 
 
         if self.target_type == "float":
             isup_grade = torch.Tensor([isup_grade]).float()
@@ -201,6 +159,7 @@ class PANDADataset(Dataset):
             isup_grade = isup_grade
         return (
             image,
+            mask,
             isup_grade,
             data_provider2id(data_provider),
             gleason2id(gleason_score),
