@@ -15,12 +15,16 @@ from hydra import utils
 
 from utils.resize_intl_tile import load_img
 
+import glob
+
 
 def get_datasets(cfg: DictConfig) -> dict:
 
     cfg = OmegaConf.create(cfg)
     df = pd.read_csv(utils.to_absolute_path(os.path.join(cfg.dataset.data_dir, "train.csv")))
     df = df[df['data_provider']=='radboud'].reset_index(drop=True)
+    mask_list = [os.path.basename(name).split('_')[0] for name in glob.glob(utils.to_absolute_path(os.path.join(cfg.dataset.data_dir,'train_label_masks/*.tiff')))]
+    df = df[df['image_id'].isin(mask_list)].reset_index(drop=True)
     #if cfg.dataset.cleansing is not None:
     #    del_df = pd.read_csv(utils.to_absolute_path(cfg.dataset.cleansing))
     #    for img_id in del_df['image_id']:
