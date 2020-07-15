@@ -88,7 +88,9 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
         # OPTIONAL
         x, y, isup_grade, data_provider, gleason_score = batch
         y_hat = self.forward(x)
-
+        print(y.shape)
+        print(y_hat.shape)
+        print('')
         val_loss = self.criteria(y_hat, y)
         val_loss = val_loss.unsqueeze(dim=-1)
         val_iou = self.iou(y_hat, y).unsqueeze(dim=-1)
