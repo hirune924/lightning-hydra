@@ -151,16 +151,14 @@ def glue_to_one_picture_from_coord(url, coordinates, window_size=200, k=16, laye
     return image
 
 
-def glue_to_one_picture_from_coord_lowlayer(url, coordinates, window_size=200, k=16, layer=1, scale=None):
-    if scale is None:
-        side = int(np.sqrt(k))
-        slide = openslide.OpenSlide(url)
-        lv2_scale = slide.level_downsamples[2]
-        scale = slide.level_downsamples[2] / slide.level_downsamples[layer]
-        # print(scale)
-        slide.close()
-    else:
-        scale = scale
+def glue_to_one_picture_from_coord_lowlayer(url, coordinates, window_size=200, k=16, layer=1):
+
+    side = int(np.sqrt(k))
+    slide = openslide.OpenSlide(url)
+    lv2_scale = slide.level_downsamples[2]
+    scale = slide.level_downsamples[2] / slide.level_downsamples[layer]
+    # print(scale)
+    slide.close()
 
     slide = skimage.io.MultiImage(url)[layer]
     slide = np.array(slide)
@@ -205,8 +203,8 @@ def load_img(
     if layer == 0:
         glued_image = glue_to_one_picture_from_coord(img_name, best_coordinates, window_size=WINDOW_SIZE, k=K, layer=layer,)
     else:
-        glued_image, scale = glue_to_one_picture_from_coord_lowlayer(img_name, best_coordinates, window_size=WINDOW_SIZE, k=K, layer=layer,)
-        glued_mask, _ = glue_to_one_picture_from_coord_lowlayer(mask_name, best_coordinates, window_size=WINDOW_SIZE, k=K, layer=layer, scale = scale)
+        glued_image = glue_to_one_picture_from_coord_lowlayer(img_name, best_coordinates, window_size=WINDOW_SIZE, k=K, layer=layer,)
+        glued_mask = glue_to_one_picture_from_coord_lowlayer(mask_name, best_coordinates, window_size=WINDOW_SIZE, k=K, layer=layer,)
     return glued_image, glued_mask
 
 

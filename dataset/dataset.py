@@ -136,7 +136,7 @@ class PANDADataset(Dataset):
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         elif self.load_type == "tiff_tile":
             img_name = utils.to_absolute_path(os.path.join(os.path.join(self.data_dir, "train_images/"), self.data.loc[idx, "image_id"] + "." + "tiff",))
-            mask_name = utils.to_absolute_path(os.path.join(os.path.join(self.data_dir, "train_images/"), self.data.loc[idx, "image_id"] + "_mask." + "tiff",))
+            mask_name = utils.to_absolute_path(os.path.join(os.path.join(self.data_dir, "train_label_masks/"), self.data.loc[idx, "image_id"] + "_mask." + "tiff",))
             if self.scale_aug:
                 scale_factor = np.clip(np.random.normal(loc=self.aug_mean, scale=self.aug_scale, size=1), 0.5, 2 * self.aug_mean - 0.5,) if self.train else self.aug_mean
             else:
