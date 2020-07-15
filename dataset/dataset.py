@@ -147,8 +147,6 @@ class PANDADataset(Dataset):
         isup_grade = self.data.loc[idx, "isup_grade"]
 
         if self.transform:
-            print(mask)
-            print(mask.shape)
             mask = mask[:,:,0]
             mask[mask == 255] = 0
             image_aug = self.transform(image=image, mask=mask)
