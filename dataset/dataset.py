@@ -151,7 +151,7 @@ class PANDADataset(Dataset):
             mask[mask == 255] = 0
             image_aug = self.transform(image=image, mask=mask)
             image = torch.from_numpy(image_aug["image"].transpose(2, 0, 1))
-            mask = torch.from_numpy(image_aug["mask"])                 
+            mask = torch.from_numpy(image_aug["mask"]).unsqueeze(dim=0)              
 
         if self.target_type == "float":
             isup_grade = torch.Tensor([isup_grade]).float()
