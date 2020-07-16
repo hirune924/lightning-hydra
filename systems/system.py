@@ -92,7 +92,7 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
         val_loss = self.criteria(y_hat, y)
         val_loss = val_loss.unsqueeze(dim=-1)
         val_iou = self.iou(y_hat, y).unsqueeze(dim=-1)
-        val_hard_iouself.iou(y_hat[:,], y).unsqueeze(dim=-1)
+        #val_hard_iou = self.iou(y_hat[:,], y).unsqueeze(dim=-1)
 
         return {
             "val_loss": val_loss,
