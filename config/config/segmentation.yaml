@@ -20,7 +20,7 @@ trainer:
 
 model:
     class_name: segmentation_models_pytorch.Unet
-    params: {encoder_name: 'resnet34', in_channels: 3, classes: 6, activation: 'sigmoid', encoder_weights: 'imagenet'}
+    params: {encoder_name: 'resnet34', in_channels: 3, classes: 3, activation: 'sigmoid', encoder_weights: 'imagenet'}
 
 training:
     loss:

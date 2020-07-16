@@ -157,7 +157,7 @@ class PANDADataset(Dataset):
             
             image_aug = self.transform(image=image, mask=mask)
             image = torch.from_numpy(image_aug["image"].transpose(2, 0, 1))
-            mask = mask2onehot(image_aug["mask"], 6)
+            mask = mask2onehot(image_aug["mask"], target_class=[3,4,5])
             mask = torch.from_numpy(mask).float()#.unsqueeze(dim=0)              
 
         if self.target_type == "float":
@@ -172,11 +172,11 @@ class PANDADataset(Dataset):
             gleason2id(gleason_score),
         )
 
-def mask2onehot(mask, num_class):
+def mask2onehot(mask, target_class):
     h,w = mask.shape
-    onehot = np.zeros([num_class, h, w])
-    for i in range(num_class):
-        onehot[i,mask==i] = 1
+    onehot = np.zeros([len(target_class), h, w])
+    for idx, c in enumerate(target_class):
+        onehot[idx,mask==c] = 1
     return onehot
 
 def data_provider2id(data_provider):
