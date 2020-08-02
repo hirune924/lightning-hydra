@@ -1,7 +1,4 @@
 # lightning-hydra
-
-
-# Thought arrangement
 ## Idea
 * co teaching
 * O2U-Net
